@@ -1,0 +1,217 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись на обучение - ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #003366 0%, #001a33 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .form-container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-width: 700px; width: 100%; padding: 50px; position: relative; overflow: hidden; }
+        .rails-decoration { position: absolute; top: 0; left: 0; width: 100%; height: 10px; background: repeating-linear-gradient(90deg, #cc0000 0px, #cc0000 30px, #003366 30px, #003366 60px); }
+        .back-btn { position: absolute; top: 20px; right: 20px; background: #003366; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .back-btn:hover { background: #cc0000; }
+        .form-header { text-align: center; margin-bottom: 40px; margin-top: 20px; }
+        .form-header h1 { color: #003366; font-size: 36px; margin-bottom: 10px; }
+        .form-header p { color: #666; font-size: 16px; }
+        .train-icon { font-size: 60px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; color: #003366; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; transition: all 0.3s; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #003366; box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .submit-btn { width: 100%; padding: 20px; background: linear-gradient(135deg, #cc0000 0%, #990000 100%); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 20px; }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(204, 0, 0, 0.4); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        /* Чекбокс согласия */
+        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; }
+        .checkbox-group input[type="checkbox"] { width: auto; margin-top: 3px; cursor: pointer; }
+        .checkbox-group label { color: #555; font-size: 13px; font-weight: normal; margin-bottom: 0; cursor: pointer; }
+        .checkbox-group a { color: #cc0000; text-decoration: none; }
+        
+        /* Уведомление */
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 10000;
+            display: none;
+            animation: slideIn 0.4s;
+            max-width: 400px;
+        }
+        .notification.show { display: block; }
+        .notification.error { background: #cc0000; }
+        @keyframes slideIn { from { transform: translateX(400px); } to { transform: translateX(0); } }
+        
+        /* Подсказка по возрасту */
+        .age-hint { font-size: 12px; color: #666; margin-top: 5px; }
+        
+        @media (max-width: 768px) { 
+            .form-row { grid-template-columns: 1fr; } 
+            .form-container { padding: 30px 20px; } 
+            .form-header h1 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="rails-decoration"></div>
+        <a href="index.html" class="back-btn">← На главную</a>
+        <div class="form-header">
+            <div class="train-icon">🚂</div>
+            <h1>Запись на обучение</h1>
+            <p>Станьте частью команды Детской железной дороги!</p>
+        </div>
+        <form id="enrollForm" onsubmit="submitForm(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">Имя *</label>
+                    <input type="text" id="firstName" required placeholder="Введите имя" minlength="2">
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Фамилия *</label>
+                    <input type="text" id="lastName" required placeholder="Введите фамилию" minlength="2">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="age">Возраст *</label>
+                    <input type="number" id="age" min="12" max="16" required placeholder="От 12 до 16 лет">
+                    <div class="age-hint">Принимаются дети от 12 до 16 лет</div>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Телефон *</label>
+                    <input type="tel" id="phone" required placeholder="+7 (___) ___-__-__">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" required placeholder="example@mail.ru">
+            </div>
+            <div class="form-group">
+                <label for="course">Выберите направление *</label>
+                <select id="course" required>
+                    <option value="">-- Выберите программу --</option>
+                    <option value="Машинист тепловоза">Машинист тепловоза</option>
+                    <option value="Помощник машиниста">Помощник машиниста</option>
+                    <option value="Дежурный по станции">Дежурный по станции</option>
+                    <option value="Проводник пассажирского вагона">Проводник пассажирского вагона</option>
+                    <option value="Специалист СЦБ">Специалист СЦБ</option>
+                    <option value="Путеец">Путеец</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="parentPhone">Телефон родителя *</label>
+                <input type="tel" id="parentPhone" required placeholder="+7 (___) ___-__-__">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="agree" required>
+                <label for="agree">Я согласен на обработку персональных данных и ознакомлен с <a href="#" onclick="alert('Политика обработки персональных данных ДЖД Казань');return false;">политикой конфиденциальности</a></label>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">🚂 Отправить заявку</button>
+        </form>
+    </div>
+    
+    <!-- Уведомление -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Маска для телефона
+        function phoneMask(input) {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.startsWith('8')) value = '7' + value.slice(1);
+                if (!value.startsWith('7')) value = '7' + value;
+                
+                let formatted = '+7';
+                if (value.length > 1) formatted += ' (' + value.slice(1, 4);
+                if (value.length >= 4) formatted += ') ' + value.slice(4, 7);
+                if (value.length >= 7) formatted += '-' + value.slice(7, 9);
+                if (value.length >= 9) formatted += '-' + value.slice(9, 11);
+                
+                e.target.value = formatted;
+            });
+        }
+        
+        phoneMask(document.getElementById('phone'));
+        phoneMask(document.getElementById('parentPhone'));
+        
+        // Уведомления
+        function showNotification(msg, isError = false) {
+            const n = document.getElementById('notification');
+            n.textContent = msg;
+            n.className = 'notification show' + (isError ? ' error' : '');
+            setTimeout(() => n.className = 'notification', 4000);
+        }
+        
+        // Отправка формы
+        function submitForm(e) {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const age = parseInt(document.getElementById('age').value);
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const course = document.getElementById('course').value;
+            const parentPhone = document.getElementById('parentPhone').value.trim();
+            const agree = document.getElementById('agree').checked;
+            
+            // Валидация
+            if (!agree) {
+                showNotification('❌ Необходимо согласие на обработку данных!', true);
+                return;
+            }
+            
+            if (age < 12 || age > 16) {
+                showNotification('❌ Возраст должен быть от 12 до 16 лет!', true);
+                return;
+            }
+            
+            // Блокируем кнопку
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Отправка...';
+            
+            // Создаём заявку
+            const applications = JSON.parse(localStorage.getItem('djd_applications') || '[]');
+            const newApp = {
+                id: Date.now(),
+                name: firstName,
+                surname: lastName,
+                age: age,
+                phone: phone,
+                email: email,
+                course: course,
+                parentPhone: parentPhone,
+                date: new Date().toLocaleDateString('ru-RU'),
+                status: 'pending'
+            };
+            
+            applications.push(newApp);
+            localStorage.setItem('djd_applications', JSON.stringify(applications));
+            
+            // Показываем успех
+            setTimeout(() => {
+                showNotification('✅ Заявка успешно отправлена! Мы свяжемся с вами в течение 24 часов.');
+                
+                // Сбрасываем форму
+                document.getElementById('enrollForm').reset();
+                btn.disabled = false;
+                btn.textContent = '🚂 Отправить заявку';
+                
+                // Перенаправление через 3 секунды
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

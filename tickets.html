@@ -1,0 +1,537 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Купить билет - ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
+        
+        /* Шапка */
+        header { position: fixed; top: 0; width: 100%; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); z-index: 1000; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 8px 5%; max-width: 1400px; margin: 0 auto; flex-wrap: wrap; }
+        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo img { width: 120px; height: 120px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #003366; }
+        .menu { display: flex; list-style: none; gap: 15px; flex-wrap: wrap; }
+        .menu a { 
+            text-decoration: none; 
+            color: #333; 
+            font-weight: 500; 
+            transition: all 0.3s; 
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .menu a:hover { color: #003366; background: rgba(0, 51, 102, 0.1); }
+        .menu a.active { color: white; background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%); }
+        
+        .main-content { margin-top: 160px; padding: 40px 20px; max-width: 800px; margin-left: auto; margin-right: auto; }
+        
+        .page-header { text-align: center; margin-bottom: 40px; }
+        .page-header h1 { color: #003366; font-size: 42px; margin-bottom: 10px; }
+        .page-header p { color: #666; font-size: 18px; }
+        
+        .ticket-form { background: white; border-radius: 20px; padding: 50px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .ticket-form h2 { color: #003366; font-size: 28px; margin-bottom: 30px; text-align: center; }
+        
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; color: #003366; font-weight: 600; margin-bottom: 8px; font-size: 15px; }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 15px; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 10px; 
+            font-size: 16px; 
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #ff6600; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* Информация о рейсе */
+        .train-info {
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: none;
+        }
+        .train-info.active { display: block; }
+        .train-info h3 { font-size: 22px; margin-bottom: 15px; }
+        .train-details { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px; }
+        .train-detail { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; }
+        .train-detail .label { font-size: 12px; opacity: 0.8; margin-bottom: 5px; }
+        .train-detail .value { font-size: 18px; font-weight: bold; }
+        
+        /* Цена */
+        .price-info {
+            background: #fff3cd;
+            border-left: 4px solid #ff6600;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .price-info h4 { color: #003366; margin-bottom: 10px; }
+        .price-info p { color: #555; line-height: 1.6; }
+        .price-info .price { font-size: 24px; font-weight: bold; color: #cc0000; margin-top: 10px; }
+        
+        .submit-btn { 
+            width: 100%; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%); 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            margin-top: 20px; 
+        }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(204, 0, 0, 0.4); }
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        
+        /* Модалка подтверждения */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-icon { font-size: 80px; margin-bottom: 20px; }
+        .modal-content h2 { color: #003366; margin-bottom: 15px; }
+        .modal-content p { color: #666; line-height: 1.6; margin-bottom: 20px; }
+        .modal-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .modal-btn:hover { transform: translateY(-3px); }
+        
+        /* Уведомление */
+        .notification {
+            position: fixed;
+            top: 180px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 10001;
+            display: none;
+            animation: slideIn 0.4s;
+            max-width: 400px;
+        }
+        .notification.show { display: block; }
+        .notification.error { background: #cc0000; }
+        
+        /* Плавающая кнопка */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            color: white;
+            padding: 20px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 10px 30px rgba(204, 0, 0, 0.5);
+            z-index: 999;
+            transition: all 0.3s;
+        }
+        .floating-btn:hover { transform: translateY(-5px) scale(1.05); }
+        
+        @media (max-width: 1200px) {
+            .menu { gap: 10px; }
+            .menu a { font-size: 13px; padding: 5px 8px; }
+        }
+        @media (max-width: 992px) {
+            nav { flex-direction: column; gap: 15px; }
+            .menu { justify-content: center; }
+        }
+        @media (max-width: 768px) {
+            .menu { display: none; }
+            .page-header h1 { font-size: 28px; }
+            .ticket-form { padding: 30px 20px; }
+            .form-row { grid-template-columns: 1fr; }
+            .train-details { grid-template-columns: 1fr; }
+            .floating-btn { padding: 15px 25px; font-size: 16px; bottom: 20px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="window.location.href='index.html'">
+                <img src="images/logo.png" alt="ДЖД Логотип">
+                <span class="logo-text">ДЖД КАЗАНЬ</span>
+            </div>
+            <ul class="menu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="about.html">О нас</a></li>
+                <li><a href="students.html">Учащимся</a></li>
+                <li><a href="passengers.html">Пассажирам</a></li>
+                <li><a href="route-map.html">🗺️ Маршрут</a></li>
+                <li><a href="gallery.html">📸 Галерея</a></li>
+                <li><a href="schedule.html">📅 Расписание</a></li>
+                <li><a href="enroll.html">📝 Запись</a></li>
+                <li><a href="history-timeline.html">📜 История</a></li>
+                <li><a href="history.html">📖 Наша история</a></li>
+                <li><a href="video.html">🎬 Видео</a></li>
+                <li><a href="parents.html">👨👧 Родителям</a></li>
+                <li><a href="feedback.html">💬 Отзывы</a></li>
+                <li><a href="additional.html">Дополнительно</a></li>
+                <li><a href="news.html">Новости</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1>🎫 Покупка билета</h1>
+            <p>Забронируйте место в поезде ДЖД Казань</p>
+        </div>
+        
+        <div class="ticket-form">
+            <h2>🚂 Оформление билета</h2>
+            
+            <!-- Информация о ценах -->
+            <div class="price-info">
+                <h4>💰 Стоимость проезда</h4>
+                <p>Дети до 5 лет — бесплатно<br>Дети от 5 до 10 лет — 100 руб.<br>Дети от 10 лет и взрослые — 200 руб.</p>
+            </div>
+            
+            <form id="ticketForm">
+                <!-- Выбор рейса -->
+                <div class="form-group">
+                    <label>Выберите рейс *</label>
+                    <select id="trainSelect" required onchange="showTrainInfo()">
+                        <option value="">-- Выберите рейс --</option>
+                    </select>
+                </div>
+                
+                <!-- Информация о выбранном рейсе -->
+                <div class="train-info" id="trainInfo">
+                    <h3>🚆 Информация о рейсе</h3>
+                    <div class="train-details">
+                        <div class="train-detail">
+                            <div class="label">Маршрут</div>
+                            <div class="value" id="infoRoute">-</div>
+                        </div>
+                        <div class="train-detail">
+                            <div class="label">Дата</div>
+                            <div class="value" id="infoDate">-</div>
+                        </div>
+                        <div class="train-detail">
+                            <div class="label">Отправление</div>
+                            <div class="value" id="infoDeparture">-</div>
+                        </div>
+                        <div class="train-detail">
+                            <div class="label">Свободно мест</div>
+                            <div class="value" id="infoSeats">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ФИО пассажира *</label>
+                        <input type="text" id="passengerName" required placeholder="Иванов Иван Иванович">
+                    </div>
+                    <div class="form-group">
+                        <label>Возраст *</label>
+                        <input type="number" id="passengerAge" min="0" max="120" required placeholder="Возраст" onchange="updatePrice()">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Телефон *</label>
+                        <input type="tel" id="passengerPhone" required placeholder="+7 (___) ___-__-__">
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="passengerEmail" required placeholder="example@mail.ru">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Количество билетов *</label>
+                    <select id="ticketCount" required onchange="updatePrice()">
+                        <option value="1">1 билет</option>
+                        <option value="2">2 билета</option>
+                        <option value="3">3 билета</option>
+                        <option value="4">4 билета</option>
+                    </select>
+                </div>
+                
+                <div class="price-info">
+                    <h4>💳 Итого к оплате</h4>
+                    <div class="price" id="totalPrice">0 ₽</div>
+                </div>
+                
+                <button type="submit" class="submit-btn">💳 Оплатить билет</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Модалка подтверждения -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-icon">✅</div>
+            <h2>Билет успешно куплен!</h2>
+            <p id="modalText">Информация о билете отправлена на вашу почту.</p>
+            <button class="modal-btn" onclick="closeModal()">Отлично!</button>
+        </div>
+    </div>
+    
+    <!-- Уведомление -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- Плавающая кнопка -->
+    <a href="enroll.html" class="floating-btn">📝 Записаться</a>
+
+    <script>
+        // ===== ЗАГРУЗКА РАСПИСАНИЯ =====
+        const defaultSchedule = [
+            { id: 1, number: "ДЖД-001", name: "Утренний экспресс", from: "molodezhnaya", fromName: "Молодёжная", to: "izumrudnaya", toName: "Изумрудная", departure: "09:00", arrival: "09:15", duration: "15 мин", price: 150, seats: 45, totalSeats: 60, date: "2026-06-13" },
+            { id: 2, number: "ДЖД-002", name: "Дневной рейс", from: "molodezhnaya", fromName: "Молодёжная", to: "izumrudnaya", toName: "Изумрудная", departure: "12:00", arrival: "12:15", duration: "15 мин", price: 150, seats: 12, totalSeats: 60, date: "2026-06-13" },
+            { id: 3, number: "ДЖД-003", name: "Вечерний поезд", from: "molodezhnaya", fromName: "Молодёжная", to: "izumrudnaya", toName: "Изумрудная", departure: "15:00", arrival: "15:15", duration: "15 мин", price: 150, seats: 0, totalSeats: 60, date: "2026-06-13" },
+            { id: 4, number: "ДЖД-004", name: "Обратный рейс", from: "izumrudnaya", fromName: "Изумрудная", to: "molodezhnaya", toName: "Молодёжная", departure: "16:00", arrival: "16:15", duration: "15 мин", price: 150, seats: 38, totalSeats: 60, date: "2026-06-13" },
+            { id: 5, number: "ДЖД-005", name: "Утренний экспресс", from: "molodezhnaya", fromName: "Молодёжная", to: "izumrudnaya", toName: "Изумрудная", departure: "09:00", arrival: "09:15", duration: "15 мин", price: 150, seats: 52, totalSeats: 60, date: "2026-06-14" },
+            { id: 6, number: "ДЖД-006", name: "Дневной рейс", from: "molodezhnaya", fromName: "Молодёжная", to: "izumrudnaya", toName: "Изумрудная", departure: "12:00", arrival: "12:15", duration: "15 мин", price: 150, seats: 45, totalSeats: 60, date: "2026-06-14" }
+        ];
+        
+        function loadSchedule() {
+            const adminSchedule = JSON.parse(localStorage.getItem('djd_schedule') || '[]');
+            const adminIds = new Set(adminSchedule.map(t => t.id));
+            const combined = [...adminSchedule];
+            defaultSchedule.forEach(t => {
+                if (!adminIds.has(t.id)) combined.push(t);
+            });
+            return combined;
+        }
+        
+        const schedule = loadSchedule();
+        let selectedTrain = null;
+        
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        function init() {
+            const select = document.getElementById('trainSelect');
+            
+            // Добавляем только рейсы с местами
+            schedule.filter(t => t.seats > 0).forEach(train => {
+                const option = document.createElement('option');
+                option.value = train.id;
+                option.textContent = `${train.number} | ${train.name} | ${formatDate(train.date)} | ${train.departure} | ${train.fromName} → ${train.toName} | Мест: ${train.seats}`;
+                select.appendChild(option);
+            });
+            
+            if (schedule.filter(t => t.seats > 0).length === 0) {
+                showNotification('❌ Нет доступных рейсов', true);
+            }
+        }
+        
+        // ===== ПОКАЗ ИНФОРМАЦИИ О РЕЙСЕ =====
+        function showTrainInfo() {
+            const trainId = parseInt(document.getElementById('trainSelect').value);
+            const trainInfo = document.getElementById('trainInfo');
+            
+            if (!trainId) {
+                trainInfo.classList.remove('active');
+                selectedTrain = null;
+                return;
+            }
+            
+            selectedTrain = schedule.find(t => t.id === trainId);
+            if (!selectedTrain) return;
+            
+            document.getElementById('infoRoute').textContent = `${selectedTrain.fromName} → ${selectedTrain.toName}`;
+            document.getElementById('infoDate').textContent = formatDate(selectedTrain.date);
+            document.getElementById('infoDeparture').textContent = selectedTrain.departure;
+            document.getElementById('infoSeats').textContent = `${selectedTrain.seats} из ${selectedTrain.totalSeats}`;
+            
+            trainInfo.classList.add('active');
+            updatePrice();
+        }
+        
+        // ===== ОБНОВЛЕНИЕ ЦЕНЫ =====
+        function updatePrice() {
+            const age = parseInt(document.getElementById('passengerAge').value) || 0;
+            const count = parseInt(document.getElementById('ticketCount').value) || 1;
+            
+            let pricePerTicket = 200;
+            if (age < 5) pricePerTicket = 0;
+            else if (age < 10) pricePerTicket = 100;
+            
+            const total = pricePerTicket * count;
+            document.getElementById('totalPrice').textContent = `${total} ₽`;
+        }
+        
+        // ===== ФОРМАТИРОВАНИЕ ДАТЫ =====
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return date.toLocaleDateString('ru-RU', options);
+        }
+        
+        // ===== МАСКА ТЕЛЕФОНА =====
+        function phoneMask(input) {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.startsWith('8')) value = '7' + value.slice(1);
+                if (!value.startsWith('7')) value = '7' + value;
+                
+                let formatted = '+7';
+                if (value.length > 1) formatted += ' (' + value.slice(1, 4);
+                if (value.length >= 4) formatted += ') ' + value.slice(4, 7);
+                if (value.length >= 7) formatted += '-' + value.slice(7, 9);
+                if (value.length >= 9) formatted += '-' + value.slice(9, 11);
+                
+                e.target.value = formatted;
+            });
+        }
+        
+        phoneMask(document.getElementById('passengerPhone'));
+        
+        // ===== УВЕДОМЛЕНИЯ =====
+        function showNotification(msg, isError = false) {
+            const n = document.getElementById('notification');
+            n.textContent = msg;
+            n.className = 'notification show' + (isError ? ' error' : '');
+            setTimeout(() => n.className = 'notification', 4000);
+        }
+        
+        // ===== ОТПРАВКА ФОРМЫ =====
+        document.getElementById('ticketForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!selectedTrain) {
+                showNotification('❌ Выберите рейс!', true);
+                return;
+            }
+            
+            const name = document.getElementById('passengerName').value.trim();
+            const age = parseInt(document.getElementById('passengerAge').value);
+            const phone = document.getElementById('passengerPhone').value.trim();
+            const email = document.getElementById('passengerEmail').value.trim();
+            const count = parseInt(document.getElementById('ticketCount').value);
+            
+            // Валидация
+            if (!name || !phone || !email) {
+                showNotification('❌ Заполните все поля!', true);
+                return;
+            }
+            
+            if (selectedTrain.seats < count) {
+                showNotification(`❌ Недостаточно мест! Свободно: ${selectedTrain.seats}`, true);
+                return;
+            }
+            
+            // Рассчитываем цену
+            let pricePerTicket = 200;
+            if (age < 5) pricePerTicket = 0;
+            else if (age < 10) pricePerTicket = 100;
+            const total = pricePerTicket * count;
+            
+            // Уменьшаем количество мест
+            selectedTrain.seats -= count;
+            
+            // Сохраняем в localStorage
+            const idx = schedule.findIndex(t => t.id === selectedTrain.id);
+            if (idx !== -1) {
+                schedule[idx].seats = selectedTrain.seats;
+                localStorage.setItem('djd_schedule', JSON.stringify(schedule));
+            }
+            
+            // Сохраняем покупку
+            const purchase = {
+                id: Date.now(),
+                trainId: selectedTrain.id,
+                trainNumber: selectedTrain.number,
+                trainName: selectedTrain.name,
+                route: `${selectedTrain.fromName} → ${selectedTrain.toName}`,
+                date: selectedTrain.date,
+                departure: selectedTrain.departure,
+                passengerName: name,
+                passengerAge: age,
+                passengerPhone: phone,
+                passengerEmail: email,
+                ticketCount: count,
+                totalPrice: total,
+                purchaseDate: new Date().toLocaleDateString('ru-RU'),
+                status: 'confirmed'
+            };
+            
+            let purchases = JSON.parse(localStorage.getItem('djd_purchases') || '[]');
+            purchases.push(purchase);
+            localStorage.setItem('djd_purchases', JSON.stringify(purchases));
+            
+            // Показываем модалку
+            document.getElementById('modalText').innerHTML = `
+                <strong>Пассажир:</strong> ${name}<br>
+                <strong>Рейс:</strong> ${selectedTrain.number} ${selectedTrain.name}<br>
+                <strong>Маршрут:</strong> ${selectedTrain.fromName} → ${selectedTrain.toName}<br>
+                <strong>Дата:</strong> ${formatDate(selectedTrain.date)}, ${selectedTrain.departure}<br>
+                <strong>Билетов:</strong> ${count}<br>
+                <strong>Сумма:</strong> ${total} ₽<br><br>
+                Билет отправлен на ${email}
+            `;
+            document.getElementById('successModal').classList.add('active');
+            
+            // Сбрасываем форму
+            this.reset();
+            document.getElementById('trainInfo').classList.remove('active');
+            document.getElementById('totalPrice').textContent = '0 ₽';
+            selectedTrain = null;
+        });
+        
+        // ===== ЗАКРЫТИЕ МОДАЛКИ =====
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('active');
+            window.location.href = 'schedule.html';
+        }
+        
+        // Закрытие модалки по клику на фон
+        document.getElementById('successModal').addEventListener('click', (e) => {
+            if (e.target.id === 'successModal') closeModal();
+        });
+        
+        // ===== ЗАПУСК =====
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

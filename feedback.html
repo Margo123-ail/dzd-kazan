@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обратная связь - ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        /* Шапка */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo img { width: 120px; height: 120px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #003366; }
+        .menu { display: flex; list-style: none; gap: 15px; flex-wrap: wrap; }
+        .menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .menu a:hover { color: #003366; background: rgba(0, 51, 102, 0.1); }
+        .menu a.active { color: white; background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%); }
+        
+        /* Контент */
+        .page-header {
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+            margin-top: 140px;
+        }
+        .page-header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .page-header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Вкладки */
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .tab-btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 10px;
+            background: white;
+            color: #003366;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .tab-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            color: white;
+        }
+        
+        /* Секции */
+        .section { display: none; animation: fadeIn 0.5s; }
+        .section.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Формы */
+        .form-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .form-card h2 { color: #003366; margin-bottom: 20px; font-size: 28px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #333; font-weight: bold; margin-bottom: 8px; }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus { outline: none; border-color: #ff6600; }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+        .submit-btn {
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(204, 0, 0, 0.4);
+        }
+        
+        /* Отзывы */
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .review-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .review-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .review-info h4 { color: #003366; margin-bottom: 5px; }
+        .review-rating { color: #ffc107; font-size: 18px; }
+        .review-text { color: #666; line-height: 1.6; font-size: 15px; }
+        .review-date { color: #999; font-size: 12px; margin-top: 10px; }
+        
+        /* FAQ */
+        .faq-list { display: flex; flex-direction: column; gap: 15px; }
+        .faq-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .faq-question {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        .faq-question:hover { background: #f8f9fa; }
+        .faq-question h3 { color: #003366; font-size: 18px; flex: 1; }
+        .faq-icon {
+            font-size: 24px;
+            color: #ff6600;
+            transition: transform 0.3s;
+        }
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+            padding: 0 20px;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 0 20px 20px;
+        }
+        .faq-answer p { color: #666; line-height: 1.6; }
+        
+        /* Уведомление */
+        .notification {
+            position: fixed;
+            top: 180px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 10000;
+            display: none;
+            animation: slideIn 0.4s;
+            max-width: 400px;
+        }
+        .notification.show { display: block; }
+        .notification.error { background: #cc0000; }
+        @keyframes slideIn { from { transform: translateX(400px); } to { transform: translateX(0); } }
+        
+        /* Чат-бот */
+        .chatbot {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .chatbot.active { display: flex; }
+        .chatbot-header {
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chatbot-header h3 { font-size: 18px; }
+        .chatbot-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .chatbot-messages { flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa; }
+        .message { margin-bottom: 15px; display: flex; gap: 10px; }
+        .message.bot { justify-content: flex-start; }
+        .message.user { justify-content: flex-end; }
+        .message-content {
+            max-width: 70%;
+            padding: 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .message.bot .message-content { background: white; color: #333; }
+        .message.user .message-content { background: #ff6600; color: white; }
+        .chatbot-input {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        .chatbot-input input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .chatbot-input input:focus { outline: none; border-color: #ff6600; }
+        .chatbot-input button {
+            background: #ff6600;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 102, 0, 0.5);
+            z-index: 999;
+            transition: all 0.3s;
+        }
+        .chatbot-toggle:hover { transform: scale(1.1); }
+        
+        /* Плавающая кнопка */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 100px;
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 10px 30px rgba(204, 0, 0, 0.5);
+            z-index: 998;
+            transition: transform 0.3s;
+        }
+        .floating-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(204, 0, 0, 0.7);
+        }
+        
+        /* Пустой список */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .empty-state .icon { font-size: 60px; margin-bottom: 15px; }
+        
+        @media (max-width: 1200px) {
+            .menu { gap: 10px; }
+            .menu a { font-size: 13px; padding: 5px 8px; }
+        }
+        @media (max-width: 992px) {
+            nav { flex-direction: column; gap: 15px; }
+            .menu { justify-content: center; }
+        }
+        @media (max-width: 768px) {
+            .menu { display: none; }
+            .page-header h1 { font-size: 28px; }
+            .chatbot { width: 90%; right: 5%; bottom: 100px; height: 400px; }
+            .chatbot-toggle { bottom: 20px; right: 20px; }
+            .floating-btn { right: 20px; bottom: 100px; padding: 12px 20px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="window.location.href='index.html'">
+                <img src="images/logo.png" alt="ДЖД Логотип">
+                <span class="logo-text">ДЖД КАЗАНЬ</span>
+            </div>
+            <ul class="menu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="about.html">О нас</a></li>
+                <li><a href="students.html">Учащимся</a></li>
+                <li><a href="passengers.html">Пассажирам</a></li>
+                <li><a href="route-map.html">🗺️ Маршрут</a></li>
+                <li><a href="gallery.html">📸 Галерея</a></li>
+                <li><a href="schedule.html">📅 Расписание</a></li>
+                <li><a href="enroll.html">📝 Запись</a></li>
+                <li><a href="history-timeline.html">📜 История</a></li>
+                <li><a href="video.html">🎬 Видео</a></li>
+                <li><a href="parents.html">👨‍👧 Родителям</a></li>
+                <li><a href="feedback.html" class="active">💬 Отзывы</a></li>
+                <li><a href="additional.html">Дополнительно</a></li>
+                <li><a href="news.html">Новости</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="page-header">
+        <h1>💬 ОБРАТНАЯ СВЯЗЬ</h1>
+        <p>Задайте вопрос, оставьте отзыв или напишите нам</p>
+    </div>
+    
+    <div class="container">
+        <!-- Вкладки -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showSection('question', this)">Задать вопрос</button>
+            <button class="tab-btn" onclick="showSection('review', this)">Оставить отзыв</button>
+            <button class="tab-btn" onclick="showSection('reviews', this)">Отзывы</button>
+            <button class="tab-btn" onclick="showSection('faq', this)">FAQ</button>
+        </div>
+        
+        <!-- Задать вопрос -->
+        <div id="question" class="section active">
+            <div class="form-card">
+                <h2>Задать вопрос</h2>
+                <form onsubmit="submitQuestion(event)">
+                    <div class="form-group">
+                        <label>Ваше имя *</label>
+                        <input type="text" id="qName" required placeholder="Введите имя">
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="qEmail" required placeholder="example@mail.ru">
+                    </div>
+                    <div class="form-group">
+                        <label>Тема вопроса *</label>
+                        <select id="qTopic" required>
+                            <option value="">-- Выберите тему --</option>
+                            <option value="Запись на обучение">Запись на обучение</option>
+                            <option value="Расписание">Расписание</option>
+                            <option value="Билеты">Билеты</option>
+                            <option value="Безопасность">Безопасность</option>
+                            <option value="Другое">Другое</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ваш вопрос *</label>
+                        <textarea id="qText" required placeholder="Опишите ваш вопрос подробно..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">📤 Отправить вопрос</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Оставить отзыв -->
+        <div id="review" class="section">
+            <div class="form-card">
+                <h2>Оставить отзыв</h2>
+                <form onsubmit="submitReview(event)">
+                    <div class="form-group">
+                        <label>Ваше имя *</label>
+                        <input type="text" id="rName" required placeholder="Введите имя">
+                    </div>
+                    <div class="form-group">
+                        <label>Оценка *</label>
+                        <select id="rRating" required>
+                            <option value="5">⭐⭐⭐⭐⭐ Отлично</option>
+                            <option value="4">⭐⭐⭐⭐ Хорошо</option>
+                            <option value="3">⭐⭐⭐ Нормально</option>
+                            <option value="2">⭐⭐ Плохо</option>
+                            <option value="1">⭐ Ужасно</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ваш отзыв *</label>
+                        <textarea id="rText" required placeholder="Поделитесь вашими впечатлениями..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">💬 Опубликовать отзыв</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Отзывы -->
+        <div id="reviews" class="section">
+            <div class="form-card">
+                <h2>Отзывы наших посетителей</h2>
+                <div class="reviews-grid" id="reviewsGrid"></div>
+            </div>
+        </div>
+        
+        <!-- FAQ -->
+        <div id="faq" class="section">
+            <div class="form-card">
+                <h2>Часто задаваемые вопросы</h2>
+                <div class="faq-list" id="faqList"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Плавающая кнопка -->
+    <a href="enroll.html" class="floating-btn">📝 Записаться</a>
+    
+    <!-- Чат-бот -->
+    <div class="chatbot-toggle" onclick="toggleChatbot()">💬</div>
+    <div class="chatbot" id="chatbot">
+        <div class="chatbot-header">
+            <h3>🤖 Помощник ДЖД</h3>
+            <button class="chatbot-close" onclick="toggleChatbot()">×</button>
+        </div>
+        <div class="chatbot-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-content">
+                    Привет! Я виртуальный помощник ДЖД Казань. Чем могу помочь?
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatInput" placeholder="Напишите вопрос..." onkeypress="handleChatKey(event)">
+            <button onclick="sendChatMessage()">➤</button>
+        </div>
+    </div>
+    
+    <!-- Уведомление -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // ===== ЗАГРУЗКА ДАННЫХ ИЗ LOCALSTORAGE =====
+        let reviews = JSON.parse(localStorage.getItem('djd_reviews') || '[]');
+        let faq = JSON.parse(localStorage.getItem('djd_faq') || '[]');
+        let questions = JSON.parse(localStorage.getItem('djd_questions') || '[]');
+        
+        // Если FAQ пустой — добавляем дефолтные
+        if (faq.length === 0) {
+            faq = [
+                { id: 1, question: "С какого возраста можно записаться на обучение?", answer: "На обучение принимаются дети в возрасте от 12 до 16 лет. Для записи необходимо заполнить форму на сайте или обратиться лично в депо ДЖД." },
+                { id: 2, question: "Сколько длится обучение?", answer: "Обучение длится один учебный год (с сентября по май). Занятия проходят по выходным дням. После успешного окончания выдается сертификат." },
+                { id: 3, question: "Нужна ли медицинская справка?", answer: "Да, для зачисления необходима медицинская справка формы 086/у, подтверждающая отсутствие противопоказаний для работы на железной дороге." },
+                { id: 4, question: "Можно ли кататься на поезде без обучения?", answer: "Да! Пассажиры могут кататься на поезде в выходные и праздничные дни. Билеты можно приобрести онлайн на сайте или в кассе станции." },
+                { id: 5, question: "Безопасно ли на ДЖД?", answer: "Абсолютно безопасно! Все поезда управляются опытными инструкторами, соблюдается скоростной режим, проводится регулярный технический осмотр состава и путей." },
+                { id: 6, question: "Есть ли скидки для групп?", answer: "Да, для групп от 10 человек предоставляется скидка 15%. Для школьных классов и детских организаций — специальные условия. Свяжитесь с нами для уточнения." }
+            ];
+            localStorage.setItem('djd_faq', JSON.stringify(faq));
+        }
+        
+        // ===== УВЕДОМЛЕНИЯ =====
+        function showNotification(msg, isError = false) {
+            const n = document.getElementById('notification');
+            n.textContent = msg;
+            n.className = 'notification show' + (isError ? ' error' : '');
+            setTimeout(() => n.className = 'notification', 4000);
+        }
+        
+        // ===== ПЕРЕКЛЮЧЕНИЕ СЕКЦИЙ =====
+        function showSection(sectionId, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            if (btn) btn.classList.add('active');
+        }
+        
+        // ===== ОТПРАВКА ВОПРОСА =====
+        function submitQuestion(e) {
+            e.preventDefault();
+            const question = {
+                id: Date.now(),
+                name: document.getElementById('qName').value,
+                email: document.getElementById('qEmail').value,
+                topic: document.getElementById('qTopic').value,
+                text: document.getElementById('qText').value,
+                date: new Date().toLocaleDateString('ru-RU'),
+                status: 'new'
+            };
+            
+            questions.push(question);
+            localStorage.setItem('djd_questions', JSON.stringify(questions));
+            
+            showNotification(`✅ Вопрос отправлен! Мы ответим на ${question.email} в течение 24 часов.`);
+            e.target.reset();
+        }
+        
+        // ===== ОТПРАВКА ОТЗЫВА =====
+        function submitReview(e) {
+            e.preventDefault();
+            const newReview = {
+                id: Date.now(),
+                name: document.getElementById('rName').value,
+                rating: parseInt(document.getElementById('rRating').value),
+                text: document.getElementById('rText').value,
+                date: new Date().toLocaleDateString('ru-RU')
+            };
+            
+            reviews.unshift(newReview);
+            localStorage.setItem('djd_reviews', JSON.stringify(reviews));
+            
+            showNotification(`✅ Отзыв опубликован! Спасибо, ${newReview.name}!`);
+            e.target.reset();
+            
+            // Переключаемся на вкладку отзывов
+            setTimeout(() => {
+                showSection('reviews', document.querySelectorAll('.tab-btn')[2]);
+                renderReviews();
+            }, 1000);
+        }
+        
+        // ===== ОТРИСОВКА ОТЗЫВОВ =====
+        function renderReviews() {
+            const grid = document.getElementById('reviewsGrid');
+            
+            if (reviews.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><div class="icon">💬</div><h3>Пока нет отзывов</h3><p>Будьте первым, кто оставит отзыв!</p></div>';
+                return;
+            }
+            
+            grid.innerHTML = '';
+            reviews.forEach(review => {
+                const card = document.createElement('div');
+                card.className = 'review-card';
+                const stars = '⭐'.repeat(review.rating);
+                const initial = review.name.charAt(0);
+                
+                card.innerHTML = `
+                    <div class="review-header">
+                        <div class="review-avatar">${initial}</div>
+                        <div class="review-info">
+                            <h4>${review.name}</h4>
+                            <div class="review-rating">${stars}</div>
+                        </div>
+                    </div>
+                    <div class="review-text">${review.text}</div>
+                    <div class="review-date">${review.date}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        // ===== ОТРИСОВКА FAQ =====
+        function renderFaq() {
+            const list = document.getElementById('faqList');
+            
+            if (faq.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">❓</div><h3>Пока нет вопросов</h3></div>';
+                return;
+            }
+            
+            list.innerHTML = faq.map(f => `
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <h3>${f.question}</h3>
+                        <span class="faq-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>${f.answer}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // ===== FAQ ТОГЛ =====
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            faqItem.classList.toggle('active');
+        }
+        
+        // ===== ЧАТ-БОТ =====
+        function toggleChatbot() {
+            document.getElementById('chatbot').classList.toggle('active');
+        }
+        
+        function handleChatKey(e) {
+            if (e.key === 'Enter') sendChatMessage();
+        }
+        
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            setTimeout(() => {
+                const response = getBotResponse(message);
+                addMessage(response, 'bot');
+            }, 1000);
+        }
+        
+        function addMessage(text, type) {
+            const messages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            messageDiv.appendChild(contentDiv);
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        function getBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            if (lowerMessage.includes('запис') || lowerMessage.includes('обучен')) {
+                return 'Для записи на обучение заполните форму на странице "Запись на обучение" или позвоните нам: +7 (843) 294-23-04';
+            } else if (lowerMessage.includes('расписан') || lowerMessage.includes('когда')) {
+                return 'Расписание поездов смотрите в разделе "Расписание". Поезда ходят каждые выходные с 9:00 до 18:00.';
+            } else if (lowerMessage.includes('билет') || lowerMessage.includes('цен')) {
+                return 'Стоимость билета: 150 рублей. Дети до 7 лет - бесплатно. Групповые скидки от 10 человек.';
+            } else if (lowerMessage.includes('адрес') || lowerMessage.includes('где')) {
+                return 'Мы находимся: г. Казань, ул. Алтынова, 4А (станция "Молодёжная"). Смотрите раздел "Контакты" для карты.';
+            } else if (lowerMessage.includes('привет') || lowerMessage.includes('здравствуй')) {
+                return 'Здравствуйте! Чем могу помочь?';
+            } else {
+                return 'Извините, я не понял вопрос. Попробуйте спросить о записи, расписании, билетах или адресе.';
+            }
+        }
+        
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        window.addEventListener('load', () => {
+            renderReviews();
+            renderFaq();
+        });
+    </script>
+</body>
+</html>

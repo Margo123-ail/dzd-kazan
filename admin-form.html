@@ -1,0 +1,2190 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - Визуальный редактор ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; min-height: 100vh; }
+        
+        /* Боковое меню */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #003366 0%, #001a33 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .sidebar-header h2 { font-size: 20px; margin-bottom: 5px; }
+        .sidebar-header p { font-size: 12px; opacity: 0.7; }
+        .sidebar-menu { padding: 15px 0; }
+        .menu-group { margin-bottom: 15px; }
+        .menu-group-title { padding: 8px 20px; font-size: 11px; text-transform: uppercase; opacity: 0.5; letter-spacing: 1px; }
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.1); border-left-color: #ff6600; }
+        .menu-item.active { background: rgba(255,102,0,0.2); border-left-color: #ff6600; font-weight: bold; }
+        .menu-item .icon { font-size: 18px; }
+        .menu-item .badge {
+            margin-left: auto;
+            background: #ff6600;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        /* Основной контент */
+        .main { flex: 1; margin-left: 280px; padding: 20px; }
+        
+        /* Верхняя панель */
+        .topbar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .topbar h1 { color: #003366; font-size: 24px; }
+        .topbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .topbar-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,102,0,0.4); }
+        .btn-success { background: #4caf50; color: white; }
+        .btn-success:hover { background: #388e3c; }
+        .btn-danger { background: #cc0000; color: white; }
+        .btn-danger:hover { background: #990000; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn-info { background: #0066cc; color: white; }
+        .btn-info:hover { background: #004d99; }
+        
+        /* Секции */
+        .section { display: none; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Карточки */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .card h3 {
+            color: #003366;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff6600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card h3 .count {
+            background: #ff6600;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+        
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #ff6600;
+        }
+        .stat-card .icon { font-size: 32px; margin-bottom: 10px; }
+        .stat-card .number { font-size: 32px; font-weight: bold; color: #003366; }
+        .stat-card .label { color: #666; font-size: 14px; }
+        
+        /* Формы */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #333; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6600;
+        }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        /* Таблицы */
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #003366; color: white; padding: 12px; text-align: left; font-size: 14px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        tr:hover { background: #f8f9fa; }
+        
+        /* Элементы списка */
+        .item-list { display: flex; flex-direction: column; gap: 15px; }
+        .item-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ff6600;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            transition: all 0.3s;
+        }
+        .item-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .item-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #ddd;
+        }
+        .item-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .item-info { flex: 1; min-width: 0; }
+        .item-info h4 { color: #003366; margin-bottom: 5px; font-size: 16px; }
+        .item-info p { color: #666; font-size: 14px; margin-bottom: 5px; line-height: 1.5; }
+        .item-meta { font-size: 12px; color: #999; }
+        .item-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .action-btn.edit { background: #0066cc; color: white; }
+        .action-btn.delete { background: #cc0000; color: white; }
+        .action-btn.view { background: #4caf50; color: white; }
+        .action-btn:hover { transform: translateY(-2px); }
+        
+        /* Превью фото */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .photo-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+        }
+        .photo-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .photo-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
+        .photo-card .photo-info { padding: 10px; }
+        .photo-card .photo-info h4 { font-size: 13px; color: #003366; margin-bottom: 5px; }
+        .photo-card .photo-info p { font-size: 11px; color: #666; margin-bottom: 8px; }
+        .photo-card .photo-actions { display: flex; gap: 5px; }
+        .photo-card .photo-actions button {
+            flex: 1;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .photo-card .category-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ff6600;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        /* РЕДАКТОР СТРАНИЦ */
+        .page-editor-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            height: calc(100vh - 200px);
+        }
+        .preview-panel {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        .preview-toolbar {
+            background: #003366;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .preview-toolbar select {
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: none;
+            background: white;
+            color: #003366;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .preview-toolbar button {
+            padding: 6px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .preview-frame {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: white;
+        }
+        .edit-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow-y: auto;
+        }
+        .edit-panel h3 {
+            color: #003366;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff6600;
+            font-size: 18px;
+        }
+        .edit-field {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #ff6600;
+        }
+        .edit-field label {
+            display: block;
+            color: #003366;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        .edit-field input, .edit-field textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .edit-field textarea { min-height: 80px; resize: vertical; }
+        .edit-field input:focus, .edit-field textarea:focus {
+            outline: none;
+            border-color: #ff6600;
+        }
+        
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 10000;
+            display: none;
+            animation: slideIn 0.3s;
+            max-width: 400px;
+        }
+        .notification.show { display: block; }
+        .notification.error { background: #cc0000; }
+        @keyframes slideIn { from { transform: translateX(400px); } to { transform: translateX(0); } }
+        
+        /* Статус */
+        .status { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .status-new { background: #e3f2fd; color: #1976d2; }
+        .status-reviewed { background: #fff3e0; color: #f57c00; }
+        .status-approved { background: #e8f5e9; color: #388e3c; }
+        
+        /* Пустое состояние */
+        .empty-state { text-align: center; padding: 40px; color: #666; }
+        .empty-state .icon { font-size: 60px; margin-bottom: 15px; }
+        .empty-state h3 { color: #003366; margin-bottom: 10px; }
+        
+        /* Табы */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .tab.active { background: #ff6600; color: white; border-color: #ff6600; }
+        
+        /* Режим редактирования */
+        .edit-mode-banner {
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        .edit-mode-banner.active { display: block; }
+        
+        /* Выделение редактируемых элементов */
+        .editable-highlight {
+            outline: 2px dashed #ff6600 !important;
+            outline-offset: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .editable-highlight:hover {
+            background: rgba(255, 102, 0, 0.1) !important;
+        }
+        
+        @media (max-width: 1200px) {
+            .page-editor-container { grid-template-columns: 1fr; height: auto; }
+            .preview-frame { height: 500px; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; position: relative; height: auto; }
+            .main { margin-left: 0; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Боковое меню -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🔒 Админ-панель</h2>
+            <p>ДЖД Казань</p>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-group">
+                <div class="menu-group-title">Обзор</div>
+                <div class="menu-item active" onclick="showSection('dashboard', this)">
+                    <span class="icon">📊</span> Дашборд
+                </div>
+                <div class="menu-item" onclick="showSection('editor', this)">
+                    <span class="icon">✏️</span> Редактор страниц
+                </div>
+            </div>
+            
+            <div class="menu-group">
+                <div class="menu-group-title">Контент</div>
+                <div class="menu-item" onclick="showSection('photos', this)">
+                    <span class="icon">📸</span> Фотогалерея
+                    <span class="badge" id="photosBadge">0</span>
+                </div>
+                <div class="menu-item" onclick="showSection('videos', this)">
+                    <span class="icon">🎬</span> Видео
+                    <span class="badge" id="videosBadge">0</span>
+                </div>
+                <div class="menu-item" onclick="showSection('news', this)">
+                    <span class="icon">📰</span> Новости
+                    <span class="badge" id="newsBadge">0</span>
+                </div>
+                <div class="menu-item" onclick="showSection('teachers', this)">
+                    <span class="icon">👨‍🏫</span> Преподаватели
+                    <span class="badge" id="teachersBadge">0</span>
+                </div>
+            </div>
+            
+            <div class="menu-group">
+                <div class="menu-group-title">Управление</div>
+                <div class="menu-item" onclick="showSection('schedule', this)">
+                    <span class="icon">📅</span> Расписание
+                    <span class="badge" id="scheduleBadge">0</span>
+                </div>
+                <div class="menu-item" onclick="showSection('stations', this)">
+                    <span class="icon">🚉</span> Станции маршрута
+                    <span class="badge" id="stationsBadge">0</span>
+                </div>
+                <div class="menu-item" onclick="showSection('timeline', this)">
+                    <span class="icon">📜</span> История
+                    <span class="badge" id="timelineBadge">0</span>
+                </div>
+                <div class="menu-item" onclick="showSection('graduates', this)">
+                    <span class="icon">🎓</span> Выпускники
+                    <span class="badge" id="graduatesBadge">0</span>
+                </div>
+            </div>
+            
+            <div class="menu-group">
+                <div class="menu-group-title">Обратная связь</div>
+                <div class="menu-item" onclick="showSection('applications', this)">
+                    <span class="icon">📝</span> Заявки
+                    <span class="badge" id="appsBadge">0</span>
+                </div>
+                <div class="menu-item" onclick="showSection('reviews', this)">
+                    <span class="icon">💬</span> Отзывы
+                    <span class="badge" id="reviewsBadge">0</span>
+                </div>
+                <div class="menu-item" onclick="showSection('questions', this)">
+                    <span class="icon">❓</span> Вопросы
+                    <span class="badge" id="questionsBadge">0</span>
+                </div>
+            </div>
+            
+            <div class="menu-group">
+                <div class="menu-group-title">Родителям</div>
+                <div class="menu-item" onclick="showSection('events', this)">
+                    <span class="icon">🎉</span> Мероприятия
+                    <span class="badge" id="eventsBadge">0</span>
+                </div>
+                <div class="menu-item" onclick="showSection('parentsFaq', this)">
+                    <span class="icon">❔</span> FAQ для родителей
+                    <span class="badge" id="parentsFaqBadge">0</span>
+                </div>
+            </div>
+            
+            <div class="menu-group">
+                <div class="menu-group-title">Система</div>
+                <div class="menu-item" onclick="showSection('settings', this)">
+                    <span class="icon">⚙️</span> Настройки сайта
+                </div>
+                <div class="menu-item" onclick="exportAllData()">
+                    <span class="icon">💾</span> Экспорт данных
+                </div>
+                <div class="menu-item" onclick="document.getElementById('importFile').click()">
+                    <span class="icon">📥</span> Импорт данных
+                </div>
+                <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+                <div class="menu-item" onclick="logout()">
+                    <span class="icon">🚪</span> Выйти
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Основной контент -->
+    <div class="main">
+        <!-- Верхняя панель -->
+        <div class="topbar">
+            <h1 id="pageTitle">📊 Дашборд</h1>
+            <div class="topbar-actions">
+                <a href="index.html" class="topbar-btn btn-primary" target="_blank">🌐 Открыть сайт</a>
+            </div>
+        </div>
+        
+        <!-- ДАШБОРД -->
+        <div id="dashboard" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="icon">📝</div><div class="number" id="statApps">0</div><div class="label">Заявок</div></div>
+                <div class="stat-card"><div class="icon">📸</div><div class="number" id="statPhotos">0</div><div class="label">Фото</div></div>
+                <div class="stat-card"><div class="icon">🎬</div><div class="number" id="statVideos">0</div><div class="label">Видео</div></div>
+                <div class="stat-card"><div class="icon">💬</div><div class="number" id="statReviews">0</div><div class="label">Отзывов</div></div>
+                <div class="stat-card"><div class="icon">📰</div><div class="number" id="statNews">0</div><div class="label">Новостей</div></div>
+                <div class="stat-card"><div class="icon">👨‍🏫</div><div class="number" id="statTeachers">0</div><div class="label">Преподавателей</div></div>
+                <div class="stat-card"><div class="icon">📅</div><div class="number" id="statSchedule">0</div><div class="label">Рейсов</div></div>
+                <div class="stat-card"><div class="icon">🎉</div><div class="number" id="statEvents">0</div><div class="label">Мероприятий</div></div>
+            </div>
+            
+            <div class="card">
+                <h3>🚀 Быстрые действия</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="topbar-btn btn-primary" onclick="showSection('editor', document.querySelector('[onclick*=editor]'))">✏️ Редактировать страницу</button>
+                    <button class="topbar-btn btn-primary" onclick="showSection('photos', document.querySelector('[onclick*=photos]'))">📸 Добавить фото</button>
+                    <button class="topbar-btn btn-primary" onclick="showSection('videos', document.querySelector('[onclick*=videos]'))">🎬 Добавить видео</button>
+                    <button class="topbar-btn btn-primary" onclick="showSection('news', document.querySelector('[onclick*=news]'))">📰 Опубликовать новость</button>
+                    <button class="topbar-btn btn-primary" onclick="showSection('applications', document.querySelector('[onclick*=applications]'))">📝 Обработать заявки</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>ℹ️ О панели</h3>
+                <p><strong>✏️ Редактор страниц</strong> — открываете любую страницу сайта и редактируете тексты прямо на ней. Все изменения сохраняются и отображаются на сайте.</p>
+                <p style="margin-top: 10px;"><strong>📊 Управление контентом</strong> — добавляйте фото, видео, новости, управляйте расписанием и преподавателями.</p>
+                <p style="margin-top: 10px; color: #cc0000;"><strong>⚠️ Важно:</strong> Все данные хранятся в localStorage. Используйте "Экспорт данных" для резервной копии!</p>
+            </div>
+        </div>
+        
+        <!-- РЕДАКТОР СТРАНИЦ -->
+        <div id="editor" class="section">
+            <div class="card" style="padding: 15px 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h3 style="margin: 0; border: none; padding: 0;">✏️ Визуальный редактор страниц</h3>
+                        <p style="color: #666; font-size: 14px; margin-top: 5px;">Редактируйте тексты прямо на странице сайта</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="topbar-btn btn-info" onclick="loadPageToEditor()">🔄 Загрузить страницу</button>
+                        <button class="topbar-btn btn-success" onclick="saveAllEdits()">💾 Сохранить все изменения</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="page-editor-container">
+                <!-- Превью страницы -->
+                <div class="preview-panel">
+                    <div class="preview-toolbar">
+                        <select id="pageSelect" onchange="loadPageToEditor()">
+                            <option value="index.html">🏠 Главная</option>
+                            <option value="about.html">ℹ️ О нас</option>
+                            <option value="students.html">🎓 Учащимся</option>
+                            <option value="passengers.html">🚂 Пассажирам</option>
+                            <option value="contacts.html">📞 Контакты</option>
+                            <option value="news.html">📰 Новости</option>
+                            <option value="gallery.html">📸 Галерея</option>
+                            <option value="schedule.html">📅 Расписание</option>
+                            <option value="history-timeline.html">📜 История</option>
+                            <option value="video.html">🎬 Видео</option>
+                            <option value="parents.html">👨👧 Родителям</option>
+                            <option value="feedback.html">💬 Отзывы</option>
+                        </select>
+                        <button class="btn-info" onclick="toggleEditMode()" id="editModeBtn">✏️ Режим редактирования</button>
+                        <button class="btn-primary" onclick="refreshPreview()">🔄 Обновить</button>
+                    </div>
+                    <div class="edit-mode-banner" id="editModeBanner">
+                        ✏️ РЕЖИМ РЕДАКТИРОВАНИЯ — кликайте на тексты чтобы изменить их
+                    </div>
+                    <iframe id="previewFrame" class="preview-frame" src="about.html"></iframe>
+                </div>
+                
+                <!-- Панель редактирования -->
+                <div class="edit-panel">
+                    <h3>📝 Редактируемые элементы</h3>
+                    <div id="editFields">
+                        <p style="color: #666; text-align: center; padding: 20px;">
+                            Выберите страницу и нажмите "Загрузить страницу"<br>
+                            или включите "Режим редактирования"
+                        </p>
+                    </div>
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #eee;">
+                        <button class="topbar-btn btn-success" onclick="saveAllEdits()" style="width: 100%;">💾 Сохранить все изменения</button>
+                        <button class="topbar-btn btn-secondary" onclick="resetPageEdits()" style="width: 100%; margin-top: 10px;">↩️ Сбросить изменения</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ФОТОГАЛЕРЕЯ -->
+        <div id="photos" class="section">
+            <div class="card">
+                <h3>📸 Добавить новое фото <span class="count" id="photosCount">0</span></h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Название фото</label>
+                        <input type="text" id="photoTitle" placeholder="Например: Открытие сезона 2026">
+                    </div>
+                    <div class="form-group">
+                        <label>Категория</label>
+                        <select id="photoCategory">
+                            <option value="students">Ученики</option>
+                            <option value="teachers">Преподаватели</option>
+                            <option value="events">Мероприятия</option>
+                            <option value="trains">Поезда</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="photoDesc" placeholder="Краткое описание фото"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL изображения или загрузите файл</label>
+                    <input type="text" id="photoUrl" placeholder="https://example.com/photo.jpg">
+                </div>
+                <div class="form-group">
+                    <label>Или загрузить файл:</label>
+                    <input type="file" id="photoFile" accept="image/*" onchange="handlePhotoUpload(event)">
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addPhoto()">📸 Добавить фото</button>
+            </div>
+            
+            <div class="card">
+                <h3>🖼️ Все фото</h3>
+                <div class="photo-grid" id="photosGrid"></div>
+            </div>
+        </div>
+        
+        <!-- ВИДЕО -->
+        <div id="videos" class="section">
+            <div class="card">
+                <h3>🎬 Добавить новое видео <span class="count" id="videosCount">0</span></h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Название видео</label>
+                        <input type="text" id="videoTitle" placeholder="Например: Репортаж об открытии">
+                    </div>
+                    <div class="form-group">
+                        <label>Категория</label>
+                        <select id="videoCategory">
+                            <option value="reports">Репортажи</option>
+                            <option value="excursions">Экскурсии</option>
+                            <option value="events">Мероприятия</option>
+                            <option value="interviews">Интервью</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="videoDesc" placeholder="Краткое описание"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>URL видео (YouTube/VK embed)</label>
+                        <input type="text" id="videoUrl" placeholder="https://www.youtube.com/embed/...">
+                    </div>
+                    <div class="form-group">
+                        <label>URL превью</label>
+                        <input type="text" id="videoThumb" placeholder="https://example.com/thumb.jpg">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Длительность</label>
+                        <input type="text" id="videoDuration" placeholder="5:42">
+                    </div>
+                    <div class="form-group">
+                        <label>Просмотры</label>
+                        <input type="number" id="videoViews" placeholder="0" value="0">
+                    </div>
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addVideo()">🎬 Добавить видео</button>
+            </div>
+            
+            <div class="card">
+                <h3>📹 Все видео</h3>
+                <div class="item-list" id="videosList"></div>
+            </div>
+        </div>
+        
+        <!-- НОВОСТИ -->
+        <div id="news" class="section">
+            <div class="card">
+                <h3>📰 Опубликовать новость <span class="count" id="newsCount">0</span></h3>
+                <div class="form-group">
+                    <label>Заголовок</label>
+                    <input type="text" id="newsTitle" placeholder="Заголовок новости">
+                </div>
+                <div class="form-group">
+                    <label>Автор</label>
+                    <input type="text" id="newsAuthor" placeholder="Администрация ДЖД">
+                </div>
+                <div class="form-group">
+                    <label>Текст новости</label>
+                    <textarea id="newsText" placeholder="Текст публикации..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL изображения (необязательно)</label>
+                    <input type="text" id="newsImage" placeholder="https://...">
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addNews()">📰 Опубликовать</button>
+            </div>
+            
+            <div class="card">
+                <h3>📢 Все новости</h3>
+                <div class="item-list" id="newsList"></div>
+            </div>
+        </div>
+        
+        <!-- ПРЕПОДАВАТЕЛИ -->
+        <div id="teachers" class="section">
+            <div class="card">
+                <h3>👨‍🏫 Добавить преподавателя <span class="count" id="teachersCount">0</span></h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ФИО</label>
+                        <input type="text" id="teacherName" placeholder="Иванов Иван Иванович">
+                    </div>
+                    <div class="form-group">
+                        <label>Должность</label>
+                        <input type="text" id="teacherPos" placeholder="Педагог">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="teacherDesc" placeholder="Краткое описание"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL фото</label>
+                    <input type="text" id="teacherImg" placeholder="images/teachers/teacher.jpg">
+                </div>
+                <div class="form-group">
+                    <label>Качества (через запятую)</label>
+                    <input type="text" id="teacherTraits" placeholder="Профессионализм, Опыт, Доброта">
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addTeacher()">👨‍🏫 Добавить</button>
+            </div>
+            
+            <div class="card">
+                <h3>👥 Все преподаватели</h3>
+                <div class="item-list" id="teachersList"></div>
+            </div>
+        </div>
+        
+        <!-- РАСПИСАНИЕ -->
+        <div id="schedule" class="section">
+            <div class="card">
+                <h3>📅 Добавить рейс <span class="count" id="scheduleCount">0</span></h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Номер поезда</label>
+                        <input type="text" id="trainNumber" placeholder="ДЖД-001">
+                    </div>
+                    <div class="form-group">
+                        <label>Название</label>
+                        <input type="text" id="trainName" placeholder="Утренний экспресс">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Откуда</label>
+                        <select id="trainFrom">
+                            <option value="molodezhnaya">Молодёжная</option>
+                            <option value="berezovaya">Берёзовая роща</option>
+                            <option value="sportivnaya">Спортивная</option>
+                            <option value="izumrudnaya">Изумрудная</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Куда</label>
+                        <select id="trainTo">
+                            <option value="molodezhnaya">Молодёжная</option>
+                            <option value="berezovaya">Берёзовая роща</option>
+                            <option value="sportivnaya">Спортивная</option>
+                            <option value="izumrudnaya">Изумрудная</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Дата</label>
+                        <input type="date" id="trainDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Отправление</label>
+                        <input type="time" id="trainDeparture">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Прибытие</label>
+                        <input type="time" id="trainArrival">
+                    </div>
+                    <div class="form-group">
+                        <label>В пути</label>
+                        <input type="text" id="trainDuration" placeholder="15 мин">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Цена (руб)</label>
+                        <input type="number" id="trainPrice" value="150">
+                    </div>
+                    <div class="form-group">
+                        <label>Всего мест</label>
+                        <input type="number" id="trainTotalSeats" value="60">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Свободно мест</label>
+                    <input type="number" id="trainSeats" value="60">
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addTrain()">🚆 Добавить рейс</button>
+            </div>
+            
+            <div class="card">
+                <h3>🚆 Все рейсы</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Название</th>
+                            <th>Маршрут</th>
+                            <th>Дата</th>
+                            <th>Время</th>
+                            <th>Места</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTable"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- СТАНЦИИ МАРШРУТА -->
+        <div id="stations" class="section">
+            <div class="card">
+                <h3>🚉 Станции маршрута <span class="count" id="stationsCount">0</span></h3>
+                <p style="margin-bottom: 15px; color: #666;">Редактируйте информацию о каждой станции:</p>
+                <div id="stationsEditor"></div>
+                <button class="topbar-btn btn-primary" onclick="addStation()" style="margin-top: 15px;">➕ Добавить станцию</button>
+                <button class="topbar-btn btn-success" onclick="saveStations()" style="margin-top: 15px;">💾 Сохранить все станции</button>
+            </div>
+        </div>
+        
+        <!-- ИСТОРИЯ (ТАЙМЛАЙН) -->
+        <div id="timeline" class="section">
+            <div class="card">
+                <h3>📜 Добавить событие в историю <span class="count" id="timelineCount">0</span></h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Год</label>
+                        <input type="text" id="tlYear" placeholder="2007">
+                    </div>
+                    <div class="form-group">
+                        <label>Заголовок</label>
+                        <input type="text" id="tlTitle" placeholder="🎉 Открытие ДЖД">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="tlText" placeholder="Подробное описание события..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL изображения (необязательно)</label>
+                    <input type="text" id="tlImage" placeholder="https://...">
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addTimeline()">📜 Добавить событие</button>
+            </div>
+            
+            <div class="card">
+                <h3>📅 Все события</h3>
+                <div class="item-list" id="timelineList"></div>
+            </div>
+        </div>
+        
+        <!-- ВЫПУСКНИКИ -->
+        <div id="graduates" class="section">
+            <div class="card">
+                <h3>🎓 Добавить выпускника <span class="count" id="graduatesCount">0</span></h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Имя</label>
+                        <input type="text" id="gradName" placeholder="Алексей Смирнов">
+                    </div>
+                    <div class="form-group">
+                        <label>Должность</label>
+                        <input type="text" id="gradRole" placeholder="Машинист РЖД">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Цитата</label>
+                    <textarea id="gradQuote" placeholder="ДЖД дала мне путёвку в жизнь..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Год выпуска</label>
+                        <input type="text" id="gradYear" placeholder="Выпуск 2015">
+                    </div>
+                    <div class="form-group">
+                        <label>Иконка (эмодзи)</label>
+                        <input type="text" id="gradIcon" placeholder="👨‍✈️" value="🎓">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>URL фото (необязательно)</label>
+                    <input type="text" id="gradPhoto" placeholder="https://...">
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addGraduate()">🎓 Добавить выпускника</button>
+            </div>
+            
+            <div class="card">
+                <h3>🎓 Все выпускники</h3>
+                <div class="item-list" id="graduatesList"></div>
+            </div>
+        </div>
+        
+        <!-- ЗАЯВКИ -->
+        <div id="applications" class="section">
+            <div class="card">
+                <h3>📝 Все заявки <span class="count" id="appsCount">0</span></h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ФИО</th>
+                            <th>Возраст</th>
+                            <th>Направление</th>
+                            <th>Телефон</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appsTable"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- ОТЗЫВЫ -->
+        <div id="reviews" class="section">
+            <div class="card">
+                <h3>💬 Добавить отзыв <span class="count" id="reviewsCount">0</span></h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Имя автора</label>
+                        <input type="text" id="reviewName" placeholder="Иван Иванов">
+                    </div>
+                    <div class="form-group">
+                        <label>Оценка (1-5)</label>
+                        <select id="reviewRating">
+                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                            <option value="3">⭐⭐⭐ (3)</option>
+                            <option value="2">⭐⭐ (2)</option>
+                            <option value="1">⭐ (1)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Текст отзыва</label>
+                    <textarea id="reviewText" placeholder="Поделитесь впечатлениями..."></textarea>
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addReview()">💬 Добавить отзыв</button>
+            </div>
+            
+            <div class="card">
+                <h3>💬 Все отзывы</h3>
+                <div class="item-list" id="reviewsList"></div>
+            </div>
+        </div>
+        
+        <!-- ВОПРОСЫ -->
+        <div id="questions" class="section">
+            <div class="card">
+                <h3>❓ Все вопросы <span class="count" id="questionsCount">0</span></h3>
+                <div class="item-list" id="questionsList"></div>
+            </div>
+        </div>
+        
+        <!-- МЕРОПРИЯТИЯ -->
+        <div id="events" class="section">
+            <div class="card">
+                <h3>🎉 Добавить мероприятие <span class="count" id="eventsCount">0</span></h3>
+                <div class="form-group">
+                    <label>Название</label>
+                    <input type="text" id="eventTitle" placeholder="День открытых дверей">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Дата</label>
+                        <input type="date" id="eventDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Время</label>
+                        <input type="text" id="eventTime" placeholder="10:00 - 14:00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="eventDesc" placeholder="Описание мероприятия"></textarea>
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addEvent()">🎉 Добавить мероприятие</button>
+            </div>
+            
+            <div class="card">
+                <h3>📆 Все мероприятия</h3>
+                <div class="item-list" id="eventsList"></div>
+            </div>
+        </div>
+        
+        <!-- FAQ ДЛЯ РОДИТЕЛЕЙ -->
+        <div id="parentsFaq" class="section">
+            <div class="card">
+                <h3>❔ Добавить вопрос <span class="count" id="parentsFaqCount">0</span></h3>
+                <div class="form-group">
+                    <label>Вопрос</label>
+                    <input type="text" id="pfQuestion" placeholder="Введите вопрос">
+                </div>
+                <div class="form-group">
+                    <label>Ответ</label>
+                    <textarea id="pfAnswer" placeholder="Введите ответ"></textarea>
+                </div>
+                <button class="topbar-btn btn-primary" onclick="addParentsFaq()">❔ Добавить вопрос</button>
+            </div>
+            
+            <div class="card">
+                <h3>📋 Все вопросы</h3>
+                <div class="item-list" id="parentsFaqList"></div>
+            </div>
+        </div>
+        
+        <!-- НАСТРОЙКИ -->
+        <div id="settings" class="section">
+            <div class="card">
+                <h3>⚙️ Основные настройки сайта</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Название сайта</label>
+                        <input type="text" id="siteName" value="ДЖД Казань">
+                    </div>
+                    <div class="form-group">
+                        <label>Телефон</label>
+                        <input type="text" id="sitePhone" value="+7 (843) 294-23-04">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="siteEmail" value="djd_kazan@mail.ru">
+                    </div>
+                    <div class="form-group">
+                        <label>Адрес</label>
+                        <input type="text" id="siteAddress" value="г. Казань, ул. Алтынова, 4А">
+                    </div>
+                </div>
+                <button class="topbar-btn btn-success" onclick="saveSettings()">💾 Сохранить настройки</button>
+            </div>
+            
+            <div class="card">
+                <h3>🗄️ Управление данными</h3>
+                <p style="margin-bottom: 15px; color: #666;">Все данные хранятся в localStorage вашего браузера.</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="topbar-btn btn-primary" onclick="exportAllData()">💾 Экспорт всех данных</button>
+                    <button class="topbar-btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 Импорт данных</button>
+                    <button class="topbar-btn btn-danger" onclick="resetAllData()">⚠️ Сбросить все данные</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Уведомление -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // ===== ПРОВЕРКА АВТОРИЗАЦИИ =====
+        if (sessionStorage.getItem('djd_admin_logged') !== 'true') {
+            window.location.href = 'admin-login.html';
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('djd_admin_logged');
+            window.location.href = 'admin-login.html';
+        }
+        
+        // ===== ДАННЫЕ =====
+        let data = {
+            photos: JSON.parse(localStorage.getItem('djd_photos') || '[]'),
+            videos: JSON.parse(localStorage.getItem('djd_videos') || '[]'),
+            news: JSON.parse(localStorage.getItem('djd_news_posts') || '[]'),
+            teachers: JSON.parse(localStorage.getItem('djd_teachers') || '[]'),
+            schedule: JSON.parse(localStorage.getItem('djd_schedule') || '[]'),
+            stations: JSON.parse(localStorage.getItem('djd_stations') || '[]'),
+            timeline: JSON.parse(localStorage.getItem('djd_timeline') || '[]'),
+            graduates: JSON.parse(localStorage.getItem('djd_graduates') || '[]'),
+            applications: JSON.parse(localStorage.getItem('djd_applications') || '[]'),
+            reviews: JSON.parse(localStorage.getItem('djd_reviews') || '[]'),
+            questions: JSON.parse(localStorage.getItem('djd_questions') || '[]'),
+            events: JSON.parse(localStorage.getItem('djd_events') || '[]'),
+            parentsFaq: JSON.parse(localStorage.getItem('djd_parents_faq') || '[]'),
+            pages: JSON.parse(localStorage.getItem('djd_pages') || '{}'),
+            settings: JSON.parse(localStorage.getItem('djd_settings') || '{}')
+        };
+        
+        // ===== УВЕДОМЛЕНИЯ =====
+        function showNotification(msg, isError = false) {
+            const n = document.getElementById('notification');
+            n.textContent = msg;
+            n.className = 'notification show' + (isError ? ' error' : '');
+            setTimeout(() => n.className = 'notification', 3000);
+        }
+        
+        // ===== НАВИГАЦИЯ =====
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (btn) btn.classList.add('active');
+            
+            const titles = {
+                dashboard: '📊 Дашборд',
+                editor: '✏️ Редактор страниц',
+                photos: '📸 Фотогалерея',
+                videos: '🎬 Видео',
+                news: '📰 Новости',
+                teachers: '👨‍🏫 Преподаватели',
+                schedule: '📅 Расписание',
+                stations: '🚉 Станции маршрута',
+                timeline: '📜 История',
+                graduates: '🎓 Выпускники',
+                applications: '📝 Заявки',
+                reviews: '💬 Отзывы',
+                questions: '❓ Вопросы',
+                events: '🎉 Мероприятия',
+                parentsFaq: '❔ FAQ для родителей',
+                settings: '⚙️ Настройки'
+            };
+            document.getElementById('pageTitle').textContent = titles[id] || '';
+            
+            // Загрузка данных
+            if (id === 'dashboard') updateDashboard();
+            if (id === 'photos') renderPhotos();
+            if (id === 'videos') renderVideos();
+            if (id === 'news') renderNews();
+            if (id === 'teachers') renderTeachers();
+            if (id === 'schedule') renderSchedule();
+            if (id === 'stations') renderStations();
+            if (id === 'timeline') renderTimeline();
+            if (id === 'graduates') renderGraduates();
+            if (id === 'applications') renderApplications();
+            if (id === 'reviews') renderReviews();
+            if (id === 'questions') renderQuestions();
+            if (id === 'events') renderEvents();
+            if (id === 'parentsFaq') renderParentsFaq();
+            if (id === 'settings') loadSettings();
+        }
+        
+        // ===== ДАШБОРД =====
+        function updateDashboard() {
+            document.getElementById('statApps').textContent = data.applications.length;
+            document.getElementById('statPhotos').textContent = data.photos.length;
+            document.getElementById('statVideos').textContent = data.videos.length;
+            document.getElementById('statReviews').textContent = data.reviews.length;
+            document.getElementById('statNews').textContent = data.news.length;
+            document.getElementById('statTeachers').textContent = data.teachers.length;
+            document.getElementById('statSchedule').textContent = data.schedule.length;
+            document.getElementById('statEvents').textContent = data.events.length;
+            
+            // Обновляем бейджи
+            document.getElementById('photosBadge').textContent = data.photos.length;
+            document.getElementById('videosBadge').textContent = data.videos.length;
+            document.getElementById('newsBadge').textContent = data.news.length;
+            document.getElementById('teachersBadge').textContent = data.teachers.length;
+            document.getElementById('scheduleBadge').textContent = data.schedule.length;
+            document.getElementById('stationsBadge').textContent = data.stations.length;
+            document.getElementById('timelineBadge').textContent = data.timeline.length;
+            document.getElementById('graduatesBadge').textContent = data.graduates.length;
+            document.getElementById('appsBadge').textContent = data.applications.filter(a => a.status === 'pending').length;
+            document.getElementById('reviewsBadge').textContent = data.reviews.length;
+            document.getElementById('questionsBadge').textContent = data.questions.length;
+            document.getElementById('eventsBadge').textContent = data.events.length;
+            document.getElementById('parentsFaqBadge').textContent = data.parentsFaq.length;
+        }
+        
+        // ===== РЕДАКТОР СТРАНИЦ =====
+        let currentEditPage = 'about.html';
+        let editMode = false;
+        let currentPageEdits = {};
+        
+        // Конфигурация редактируемых элементов для каждой страницы
+        const editableConfig = {
+            'index.html': [
+                { selector: '.hero h1', label: 'Главный заголовок', type: 'text' },
+                { selector: '.hero p', label: 'Подзаголовок', type: 'textarea' },
+                { selector: '.btn-primary', label: 'Текст кнопки 1', type: 'text' },
+                { selector: '.btn-secondary', label: 'Текст кнопки 2', type: 'text' },
+                { selector: '.new-features h2', label: 'Заголовок раздела', type: 'text' }
+            ],
+            'about.html': [
+                { selector: '.page-title h1', label: 'Заголовок страницы', type: 'text' },
+                { selector: '.content-block:nth-child(2) h2', label: 'Заголовок блока 1', type: 'text' },
+                { selector: '.content-block:nth-child(2) p', label: 'Текст блока 1', type: 'textarea' },
+                { selector: '.highlight-box h3', label: 'Заголовок миссии', type: 'text' },
+                { selector: '.highlight-box p', label: 'Текст миссии', type: 'textarea' },
+                { selector: '.content-block:nth-child(4) h2', label: 'Заголовок блока 2', type: 'text' },
+                { selector: '.content-block:nth-child(4) p', label: 'Текст блока 2', type: 'textarea' },
+                { selector: '.content-block:nth-child(5) h2', label: 'Заголовок блока 3', type: 'text' },
+                { selector: '.content-block:nth-child(5) p', label: 'Текст блока 3', type: 'textarea' }
+            ],
+            'students.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.page-header .subtitle', label: 'Подзаголовок', type: 'text' },
+                { selector: '.intro-text p:first-child', label: 'Вводный текст', type: 'textarea' }
+            ],
+            'passengers.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.map-section h2', label: 'Заголовок карты', type: 'text' },
+                { selector: '.rules-section h2', label: 'Заголовок правил', type: 'text' }
+            ],
+            'contacts.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.socials h3', label: 'Заголовок соцсетей', type: 'text' }
+            ],
+            'news.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.submit-section h2', label: 'Заголовок формы', type: 'text' }
+            ],
+            'gallery.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.page-header p', label: 'Подзаголовок', type: 'text' }
+            ],
+            'schedule.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.page-header p', label: 'Подзаголовок', type: 'text' }
+            ],
+            'history-timeline.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.page-header p', label: 'Подзаголовок', type: 'text' }
+            ],
+            'video.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.page-header p', label: 'Подзаголовок', type: 'text' }
+            ],
+            'parents.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.page-header p', label: 'Подзаголовок', type: 'text' }
+            ],
+            'feedback.html': [
+                { selector: '.page-header h1', label: 'Заголовок', type: 'text' },
+                { selector: '.page-header p', label: 'Подзаголовок', type: 'text' }
+            ]
+        };
+        
+        function loadPageToEditor() {
+            const page = document.getElementById('pageSelect').value;
+            currentEditPage = page;
+            const frame = document.getElementById('previewFrame');
+            
+            // Загружаем страницу с параметром для применения изменений
+            frame.src = page + '?edit=1&t=' + Date.now();
+            
+            // Загружаем сохранённые изменения
+            currentPageEdits = data.pages[page] || {};
+            
+            // Ждём загрузки и настраиваем редактирование
+            frame.onload = () => {
+                setTimeout(() => {
+                    applyEditsToFrame();
+                    if (editMode) enableEditMode();
+                    buildEditFields();
+                }, 500);
+            };
+        }
+        
+        function applyEditsToFrame() {
+            const frame = document.getElementById('previewFrame');
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            const pageEdits = data.pages[currentEditPage] || {};
+            
+            Object.keys(pageEdits).forEach(selector => {
+                const elements = doc.querySelectorAll(selector);
+                elements.forEach(el => {
+                    el.textContent = pageEdits[selector];
+                });
+            });
+        }
+        
+        function toggleEditMode() {
+            editMode = !editMode;
+            const btn = document.getElementById('editModeBtn');
+            const banner = document.getElementById('editModeBanner');
+            
+            if (editMode) {
+                btn.textContent = '👁️ Режим просмотра';
+                btn.className = 'btn-secondary';
+                banner.classList.add('active');
+                enableEditMode();
+            } else {
+                btn.textContent = '✏️ Режим редактирования';
+                btn.className = 'btn-info';
+                banner.classList.remove('active');
+                disableEditMode();
+            }
+        }
+        
+        function enableEditMode() {
+            const frame = document.getElementById('previewFrame');
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            const config = editableConfig[currentEditPage] || [];
+            
+            config.forEach(item => {
+                const elements = doc.querySelectorAll(item.selector);
+                elements.forEach((el, idx) => {
+                    el.classList.add('editable-highlight');
+                    el.setAttribute('data-edit-id', `${item.selector}_${idx}`);
+                    el.setAttribute('contenteditable', 'true');
+                    
+                    el.addEventListener('blur', function() {
+                        const key = item.selector;
+                        const newValue = this.textContent;
+                        currentPageEdits[key] = newValue;
+                        
+                        // Обновляем поле в панели редактирования
+                        const field = document.querySelector(`[data-field="${key}"]`);
+                        if (field) {
+                            if (field.tagName === 'TEXTAREA') field.value = newValue;
+                            else field.value = newValue;
+                        }
+                    });
+                });
+            });
+        }
+        
+        function disableEditMode() {
+            const frame = document.getElementById('previewFrame');
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            
+            doc.querySelectorAll('.editable-highlight').forEach(el => {
+                el.classList.remove('editable-highlight');
+                el.removeAttribute('contenteditable');
+            });
+        }
+        
+        function buildEditFields() {
+            const container = document.getElementById('editFields');
+            const config = editableConfig[currentEditPage] || [];
+            const pageEdits = data.pages[currentEditPage] || {};
+            
+            if (config.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Для этой страницы нет настраиваемых полей.<br>Используйте "Режим редактирования" для изменения текстов.</p>';
+                return;
+            }
+            
+            container.innerHTML = config.map((item, idx) => {
+                const currentValue = pageEdits[item.selector] || '';
+                const inputId = `edit_${idx}`;
+                
+                if (item.type === 'textarea') {
+                    return `
+                        <div class="edit-field">
+                            <label>${item.label}</label>
+                            <textarea data-field="${item.selector}" id="${inputId}" 
+                                oninput="updateField('${item.selector}', this.value)"
+                                placeholder="Оставьте пустым для значения по умолчанию">${currentValue}</textarea>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="edit-field">
+                            <label>${item.label}</label>
+                            <input type="text" data-field="${item.selector}" id="${inputId}" 
+                                value="${currentValue}"
+                                oninput="updateField('${item.selector}', this.value)"
+                                placeholder="Оставьте пустым для значения по умолчанию">
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+        
+        function updateField(selector, value) {
+            currentPageEdits[selector] = value;
+            
+            // Обновляем в iframe
+            const frame = document.getElementById('previewFrame');
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            const elements = doc.querySelectorAll(selector);
+            elements.forEach(el => {
+                el.textContent = value;
+            });
+        }
+        
+        function saveAllEdits() {
+            if (!data.pages[currentEditPage]) data.pages[currentEditPage] = {};
+            
+            // Сохраняем все изменения из currentPageEdits
+            Object.keys(currentPageEdits).forEach(key => {
+                if (currentPageEdits[key]) {
+                    data.pages[currentEditPage][key] = currentPageEdits[key];
+                }
+            });
+            
+            saveData('pages');
+            showNotification(`✅ Изменения на странице ${currentEditPage} сохранены!`);
+        }
+        
+        function resetPageEdits() {
+            if (confirm('Сбросить все изменения на этой странице?')) {
+                delete data.pages[currentEditPage];
+                saveData('pages');
+                currentPageEdits = {};
+                loadPageToEditor();
+                showNotification('↩️ Изменения сброшены');
+            }
+        }
+        
+        function refreshPreview() {
+            loadPageToEditor();
+        }
+        
+        // ===== ФОТО =====
+        function handlePhotoUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    document.getElementById('photoUrl').value = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function addPhoto() {
+            const title = document.getElementById('photoTitle').value;
+            const url = document.getElementById('photoUrl').value;
+            if (!title || !url) { showNotification('Заполните название и URL!', true); return; }
+            
+            data.photos.push({
+                id: Date.now(),
+                title,
+                desc: document.getElementById('photoDesc').value,
+                category: document.getElementById('photoCategory').value,
+                url,
+                date: new Date().toLocaleDateString('ru-RU')
+            });
+            saveData('photos');
+            document.getElementById('photoTitle').value = '';
+            document.getElementById('photoDesc').value = '';
+            document.getElementById('photoUrl').value = '';
+            document.getElementById('photoFile').value = '';
+            renderPhotos();
+            showNotification('✅ Фото добавлено!');
+        }
+        
+        function renderPhotos() {
+            document.getElementById('photosCount').textContent = data.photos.length;
+            const grid = document.getElementById('photosGrid');
+            if (data.photos.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><div class="icon">📸</div><h3>Нет фото</h3></div>';
+                return;
+            }
+            const categoryNames = { students: 'Ученики', teachers: 'Преподаватели', events: 'Мероприятия', trains: 'Поезда' };
+            grid.innerHTML = data.photos.map(p => `
+                <div class="photo-card">
+                    <img src="${p.url}" onerror="this.src='https://via.placeholder.com/200x150/0066cc/ffffff?text=Нет+фото'">
+                    <span class="category-badge">${categoryNames[p.category] || p.category}</span>
+                    <div class="photo-info">
+                        <h4>${p.title}</h4>
+                        <p>${p.desc || ''}</p>
+                        <div class="photo-actions">
+                            <button class="action-btn delete" onclick="deletePhoto(${p.id})" style="background:#cc0000;color:white;">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deletePhoto(id) {
+            if (confirm('Удалить фото?')) {
+                data.photos = data.photos.filter(p => p.id !== id);
+                saveData('photos');
+                renderPhotos();
+                showNotification('Фото удалено');
+            }
+        }
+        
+        // ===== ВИДЕО =====
+        function addVideo() {
+            const title = document.getElementById('videoTitle').value;
+            const url = document.getElementById('videoUrl').value;
+            if (!title || !url) { showNotification('Заполните название и URL!', true); return; }
+            
+            data.videos.push({
+                id: Date.now(),
+                title,
+                desc: document.getElementById('videoDesc').value,
+                category: document.getElementById('videoCategory').value,
+                categoryName: document.getElementById('videoCategory').selectedOptions[0].text,
+                url,
+                thumbnail: document.getElementById('videoThumb').value,
+                duration: document.getElementById('videoDuration').value,
+                views: parseInt(document.getElementById('videoViews').value) || 0,
+                date: new Date().toLocaleDateString('ru-RU')
+            });
+            saveData('videos');
+            ['videoTitle', 'videoDesc', 'videoUrl', 'videoThumb', 'videoDuration'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('videoViews').value = '0';
+            renderVideos();
+            showNotification('✅ Видео добавлено!');
+        }
+        
+        function renderVideos() {
+            document.getElementById('videosCount').textContent = data.videos.length;
+            const list = document.getElementById('videosList');
+            if (data.videos.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">🎬</div><h3>Нет видео</h3></div>';
+                return;
+            }
+            list.innerHTML = data.videos.map(v => `
+                <div class="item-card">
+                    <div class="item-preview"><img src="${v.thumbnail || 'https://via.placeholder.com/100x100/0066cc/ffffff?text=🎬'}" onerror="this.src='https://via.placeholder.com/100x100/0066cc/ffffff?text=🎬'"></div>
+                    <div class="item-info">
+                        <h4>${v.title}</h4>
+                        <p>${v.desc || ''}</p>
+                        <div class="item-meta">${v.categoryName || v.category} | ${v.duration || '0:00'} | 👁️ ${v.views || 0} | 📅 ${v.date}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="deleteVideo(${v.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteVideo(id) {
+            if (confirm('Удалить видео?')) {
+                data.videos = data.videos.filter(v => v.id !== id);
+                saveData('videos');
+                renderVideos();
+                showNotification('Видео удалено');
+            }
+        }
+        
+        // ===== НОВОСТИ =====
+        function addNews() {
+            const title = document.getElementById('newsTitle').value;
+            const text = document.getElementById('newsText').value;
+            if (!title || !text) { showNotification('Заполните заголовок и текст!', true); return; }
+            
+            data.news.push({
+                id: Date.now(),
+                title,
+                author: document.getElementById('newsAuthor').value || 'Администрация',
+                text,
+                img: document.getElementById('newsImage').value,
+                date: new Date().toLocaleDateString('ru-RU'),
+                status: 'approved'
+            });
+            saveData('news');
+            ['newsTitle', 'newsAuthor', 'newsText', 'newsImage'].forEach(id => document.getElementById(id).value = '');
+            renderNews();
+            showNotification('✅ Новость опубликована!');
+        }
+        
+        function renderNews() {
+            document.getElementById('newsCount').textContent = data.news.length;
+            const list = document.getElementById('newsList');
+            if (data.news.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">📰</div><h3>Нет новостей</h3></div>';
+                return;
+            }
+            list.innerHTML = data.news.map(n => `
+                <div class="item-card">
+                    ${n.img ? `<div class="item-preview"><img src="${n.img}"></div>` : ''}
+                    <div class="item-info">
+                        <h4>${n.title}</h4>
+                        <p>${n.text.substring(0, 150)}${n.text.length > 150 ? '...' : ''}</p>
+                        <div class="item-meta">✍️ ${n.author} | 📅 ${n.date}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="deleteNews(${n.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteNews(id) {
+            if (confirm('Удалить новость?')) {
+                data.news = data.news.filter(n => n.id !== id);
+                saveData('news');
+                renderNews();
+                showNotification('Новость удалена');
+            }
+        }
+        
+        // ===== ПРЕПОДАВАТЕЛИ =====
+        function addTeacher() {
+            const name = document.getElementById('teacherName').value;
+            if (!name) { showNotification('Введите ФИО!', true); return; }
+            
+            data.teachers.push({
+                id: Date.now(),
+                name,
+                pos: document.getElementById('teacherPos').value,
+                desc: document.getElementById('teacherDesc').value,
+                img: document.getElementById('teacherImg').value,
+                traits: document.getElementById('teacherTraits').value.split(',').map(t => t.trim()).filter(t => t)
+            });
+            saveData('teachers');
+            ['teacherName', 'teacherPos', 'teacherDesc', 'teacherImg', 'teacherTraits'].forEach(id => document.getElementById(id).value = '');
+            renderTeachers();
+            showNotification('✅ Преподаватель добавлен!');
+        }
+        
+        function renderTeachers() {
+            document.getElementById('teachersCount').textContent = data.teachers.length;
+            const list = document.getElementById('teachersList');
+            if (data.teachers.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">👨‍🏫</div><h3>Нет преподавателей</h3></div>';
+                return;
+            }
+            list.innerHTML = data.teachers.map(t => `
+                <div class="item-card">
+                    <div class="item-preview"><img src="${t.img || 'https://via.placeholder.com/100x100/003366/ffffff?text=👤'}" onerror="this.src='https://via.placeholder.com/100x100/003366/ffffff?text=👤'"></div>
+                    <div class="item-info">
+                        <h4>${t.name}</h4>
+                        <p>${t.pos || ''}</p>
+                        <p>${t.desc || ''}</p>
+                        <div class="item-meta">${(t.traits || []).join(', ')}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="deleteTeacher(${t.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteTeacher(id) {
+            if (confirm('Удалить преподавателя?')) {
+                data.teachers = data.teachers.filter(t => t.id !== id);
+                saveData('teachers');
+                renderTeachers();
+                showNotification('Преподаватель удалён');
+            }
+        }
+        
+        // ===== РАСПИСАНИЕ =====
+        function addTrain() {
+            const number = document.getElementById('trainNumber').value;
+            const name = document.getElementById('trainName').value;
+            if (!number || !name) { showNotification('Заполните номер и название!', true); return; }
+            
+            data.schedule.push({
+                id: Date.now(),
+                number,
+                name,
+                from: document.getElementById('trainFrom').value,
+                fromName: document.getElementById('trainFrom').selectedOptions[0].text,
+                to: document.getElementById('trainTo').value,
+                toName: document.getElementById('trainTo').selectedOptions[0].text,
+                date: document.getElementById('trainDate').value,
+                departure: document.getElementById('trainDeparture').value,
+                arrival: document.getElementById('trainArrival').value,
+                duration: document.getElementById('trainDuration').value,
+                price: document.getElementById('trainPrice').value,
+                totalSeats: document.getElementById('trainTotalSeats').value,
+                seats: document.getElementById('trainSeats').value
+            });
+            saveData('schedule');
+            renderSchedule();
+            showNotification('✅ Рейс добавлен!');
+        }
+        
+        function renderSchedule() {
+            document.getElementById('scheduleCount').textContent = data.schedule.length;
+            const tbody = document.getElementById('scheduleTable');
+            if (data.schedule.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;">Нет рейсов</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.schedule.map(t => `
+                <tr>
+                    <td>${t.number}</td>
+                    <td>${t.name}</td>
+                    <td>${t.fromName} → ${t.toName}</td>
+                    <td>${t.date}</td>
+                    <td>${t.departure} - ${t.arrival}</td>
+                    <td>${t.seats}/${t.totalSeats}</td>
+                    <td><button class="action-btn delete" onclick="deleteTrain(${t.id})">🗑️</button></td>
+                </tr>
+            `).join('');
+        }
+        
+        function deleteTrain(id) {
+            if (confirm('Удалить рейс?')) {
+                data.schedule = data.schedule.filter(t => t.id !== id);
+                saveData('schedule');
+                renderSchedule();
+                showNotification('Рейс удалён');
+            }
+        }
+        
+        // ===== СТАНЦИИ =====
+        function renderStations() {
+            document.getElementById('stationsCount').textContent = data.stations.length;
+            const editor = document.getElementById('stationsEditor');
+            if (data.stations.length === 0) {
+                editor.innerHTML = '<div class="empty-state"><div class="icon">🚉</div><h3>Нет станций</h3></div>';
+                return;
+            }
+            editor.innerHTML = data.stations.map((s, i) => `
+                <div class="item-card" style="flex-direction: column; align-items: stretch;">
+                    <div style="display: grid; grid-template-columns: 80px 1fr 120px 1fr 50px; gap: 10px; align-items: center;">
+                        <input type="text" value="${s.icon || ''}" id="st_icon_${i}" placeholder="🚉" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                        <input type="text" value="${s.name || ''}" id="st_name_${i}" placeholder="Название" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                        <input type="text" value="${s.time || ''}" id="st_time_${i}" placeholder="00:00" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                        <input type="text" value="${s.desc || ''}" id="st_desc_${i}" placeholder="Описание" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                        <button class="action-btn delete" onclick="deleteStation(${i})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function addStation() {
+            data.stations.push({ id: Date.now(), icon: '🚉', name: '', time: '', desc: '' });
+            renderStations();
+        }
+        
+        function saveStations() {
+            data.stations = data.stations.map((s, i) => ({
+                id: s.id,
+                icon: document.getElementById(`st_icon_${i}`).value,
+                name: document.getElementById(`st_name_${i}`).value,
+                time: document.getElementById(`st_time_${i}`).value,
+                desc: document.getElementById(`st_desc_${i}`).value
+            }));
+            saveData('stations');
+            showNotification('✅ Станции сохранены!');
+        }
+        
+        function deleteStation(index) {
+            if (confirm('Удалить станцию?')) {
+                data.stations.splice(index, 1);
+                saveData('stations');
+                renderStations();
+                showNotification('Станция удалена');
+            }
+        }
+        
+        // ===== ТАЙМЛАЙН =====
+        function addTimeline() {
+            const year = document.getElementById('tlYear').value;
+            const title = document.getElementById('tlTitle').value;
+            if (!year || !title) { showNotification('Заполните год и заголовок!', true); return; }
+            
+            data.timeline.push({
+                id: Date.now(),
+                year,
+                title,
+                text: document.getElementById('tlText').value,
+                image: document.getElementById('tlImage').value
+            });
+            saveData('timeline');
+            ['tlYear', 'tlTitle', 'tlText', 'tlImage'].forEach(id => document.getElementById(id).value = '');
+            renderTimeline();
+            showNotification('✅ Событие добавлено!');
+        }
+        
+        function renderTimeline() {
+            document.getElementById('timelineCount').textContent = data.timeline.length;
+            const list = document.getElementById('timelineList');
+            if (data.timeline.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">📜</div><h3>Нет событий</h3></div>';
+                return;
+            }
+            list.innerHTML = data.timeline.map(t => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${t.year} — ${t.title}</h4>
+                        <p>${t.text || ''}</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="deleteTimeline(${t.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteTimeline(id) {
+            if (confirm('Удалить событие?')) {
+                data.timeline = data.timeline.filter(t => t.id !== id);
+                saveData('timeline');
+                renderTimeline();
+                showNotification('Событие удалено');
+            }
+        }
+        
+        // ===== ВЫПУСКНИКИ =====
+        function addGraduate() {
+            const name = document.getElementById('gradName').value;
+            if (!name) { showNotification('Введите имя!', true); return; }
+            
+            data.graduates.push({
+                id: Date.now(),
+                name,
+                role: document.getElementById('gradRole').value,
+                quote: document.getElementById('gradQuote').value,
+                year: document.getElementById('gradYear').value,
+                icon: document.getElementById('gradIcon').value,
+                photo: document.getElementById('gradPhoto').value
+            });
+            saveData('graduates');
+            ['gradName', 'gradRole', 'gradQuote', 'gradYear', 'gradPhoto'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('gradIcon').value = '🎓';
+            renderGraduates();
+            showNotification('✅ Выпускник добавлен!');
+        }
+        
+        function renderGraduates() {
+            document.getElementById('graduatesCount').textContent = data.graduates.length;
+            const list = document.getElementById('graduatesList');
+            if (data.graduates.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">🎓</div><h3>Нет выпускников</h3></div>';
+                return;
+            }
+            list.innerHTML = data.graduates.map(g => `
+                <div class="item-card">
+                    <div class="item-preview" style="display:flex;align-items:center;justify-content:center;font-size:40px;background:linear-gradient(135deg,#0066cc,#003366);">
+                        ${g.photo ? `<img src="${g.photo}">` : (g.icon || '🎓')}
+                    </div>
+                    <div class="item-info">
+                        <h4>${g.name}</h4>
+                        <p><strong>${g.role || ''}</strong></p>
+                        <p>"${g.quote || ''}"</p>
+                        <div class="item-meta">${g.year || ''}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="deleteGraduate(${g.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteGraduate(id) {
+            if (confirm('Удалить выпускника?')) {
+                data.graduates = data.graduates.filter(g => g.id !== id);
+                saveData('graduates');
+                renderGraduates();
+                showNotification('Выпускник удалён');
+            }
+        }
+        
+        // ===== ЗАЯВКИ =====
+        function renderApplications() {
+            document.getElementById('appsCount').textContent = data.applications.length;
+            const tbody = document.getElementById('appsTable');
+            if (data.applications.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;">Нет заявок</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.applications.map(a => {
+                const statusClass = a.status === 'pending' ? 'status-new' : a.status === 'reviewed' ? 'status-reviewed' : 'status-approved';
+                const statusText = a.status === 'pending' ? 'Новая' : a.status === 'reviewed' ? 'Рассмотрена' : 'Одобрена';
+                return `
+                    <tr>
+                        <td>#${a.id}</td>
+                        <td>${a.name} ${a.surname}</td>
+                        <td>${a.age}</td>
+                        <td>${a.course}</td>
+                        <td>${a.phone}</td>
+                        <td>${a.date}</td>
+                        <td><span class="status ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="action-btn view" onclick="changeAppStatus(${a.id}, 'approved')">✅</button>
+                            <button class="action-btn edit" onclick="changeAppStatus(${a.id}, 'reviewed')">👁️</button>
+                            <button class="action-btn delete" onclick="deleteApp(${a.id})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function changeAppStatus(id, status) {
+            const app = data.applications.find(a => a.id === id);
+            if (app) {
+                app.status = status;
+                saveData('applications');
+                renderApplications();
+                showNotification('Статус изменён!');
+            }
+        }
+        
+        function deleteApp(id) {
+            if (confirm('Удалить заявку?')) {
+                data.applications = data.applications.filter(a => a.id !== id);
+                saveData('applications');
+                renderApplications();
+                showNotification('Заявка удалена');
+            }
+        }
+        
+        // ===== ОТЗЫВЫ =====
+        function addReview() {
+            const name = document.getElementById('reviewName').value;
+            const text = document.getElementById('reviewText').value;
+            if (!name || !text) { showNotification('Заполните имя и текст!', true); return; }
+            
+            data.reviews.unshift({
+                id: Date.now(),
+                name,
+                rating: parseInt(document.getElementById('reviewRating').value),
+                text,
+                date: new Date().toLocaleDateString('ru-RU')
+            });
+            saveData('reviews');
+            ['reviewName', 'reviewText'].forEach(id => document.getElementById(id).value = '');
+            renderReviews();
+            showNotification('✅ Отзыв добавлен!');
+        }
+        
+        function renderReviews() {
+            document.getElementById('reviewsCount').textContent = data.reviews.length;
+            const list = document.getElementById('reviewsList');
+            if (data.reviews.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">💬</div><h3>Нет отзывов</h3></div>';
+                return;
+            }
+            list.innerHTML = data.reviews.map(r => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${r.name} ${'⭐'.repeat(r.rating)}</h4>
+                        <p>${r.text}</p>
+                        <div class="item-meta">📅 ${r.date}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="deleteReview(${r.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteReview(id) {
+            if (confirm('Удалить отзыв?')) {
+                data.reviews = data.reviews.filter(r => r.id !== id);
+                saveData('reviews');
+                renderReviews();
+                showNotification('Отзыв удалён');
+            }
+        }
+        
+        // ===== ВОПРОСЫ =====
+        function renderQuestions() {
+            document.getElementById('questionsCount').textContent = data.questions.length;
+            const list = document.getElementById('questionsList');
+            if (data.questions.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">❓</div><h3>Нет вопросов</h3></div>';
+                return;
+            }
+            list.innerHTML = data.questions.map(q => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${q.name} (${q.email})</h4>
+                        <p><strong>Тема:</strong> ${q.topic}</p>
+                        <p>${q.text}</p>
+                        <div class="item-meta">📅 ${q.date}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="deleteQuestion(${q.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteQuestion(id) {
+            if (confirm('Удалить вопрос?')) {
+                data.questions = data.questions.filter(q => q.id !== id);
+                saveData('questions');
+                renderQuestions();
+                showNotification('Вопрос удалён');
+            }
+        }
+        
+        // ===== МЕРОПРИЯТИЯ =====
+        function addEvent() {
+            const title = document.getElementById('eventTitle').value;
+            const date = document.getElementById('eventDate').value;
+            if (!title || !date) { showNotification('Заполните название и дату!', true); return; }
+            
+            data.events.push({
+                id: Date.now(),
+                title,
+                date,
+                time: document.getElementById('eventTime').value,
+                desc: document.getElementById('eventDesc').value
+            });
+            saveData('events');
+            ['eventTitle', 'eventDate', 'eventTime', 'eventDesc'].forEach(id => document.getElementById(id).value = '');
+            renderEvents();
+            showNotification('✅ Мероприятие добавлено!');
+        }
+        
+        function renderEvents() {
+            document.getElementById('eventsCount').textContent = data.events.length;
+            const list = document.getElementById('eventsList');
+            if (data.events.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><h3>Нет мероприятий</h3></div>';
+                return;
+            }
+            list.innerHTML = data.events.map(e => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${e.title}</h4>
+                        <p>${e.desc || ''}</p>
+                        <div class="item-meta">📅 ${e.date} | 🕐 ${e.time}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="deleteEvent(${e.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteEvent(id) {
+            if (confirm('Удалить мероприятие?')) {
+                data.events = data.events.filter(e => e.id !== id);
+                saveData('events');
+                renderEvents();
+                showNotification('Мероприятие удалено');
+            }
+        }
+        
+        // ===== FAQ ДЛЯ РОДИТЕЛЕЙ =====
+        function addParentsFaq() {
+            const question = document.getElementById('pfQuestion').value;
+            const answer = document.getElementById('pfAnswer').value;
+            if (!question || !answer) { showNotification('Заполните вопрос и ответ!', true); return; }
+            
+            data.parentsFaq.push({ id: Date.now(), question, answer });
+            saveData('parentsFaq');
+            document.getElementById('pfQuestion').value = '';
+            document.getElementById('pfAnswer').value = '';
+            renderParentsFaq();
+            showNotification('✅ Вопрос добавлен!');
+        }
+        
+        function renderParentsFaq() {
+            document.getElementById('parentsFaqCount').textContent = data.parentsFaq.length;
+            const list = document.getElementById('parentsFaqList');
+            if (data.parentsFaq.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">❔</div><h3>Нет вопросов</h3></div>';
+                return;
+            }
+            list.innerHTML = data.parentsFaq.map(f => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>❓ ${f.question}</h4>
+                        <p>💬 ${f.answer}</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="deleteParentsFaq(${f.id})">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteParentsFaq(id) {
+            if (confirm('Удалить вопрос?')) {
+                data.parentsFaq = data.parentsFaq.filter(f => f.id !== id);
+                saveData('parentsFaq');
+                renderParentsFaq();
+                showNotification('Вопрос удалён');
+            }
+        }
+        
+        // ===== НАСТРОЙКИ =====
+        function loadSettings() {
+            if (data.settings.siteName) document.getElementById('siteName').value = data.settings.siteName;
+            if (data.settings.phone) document.getElementById('sitePhone').value = data.settings.phone;
+            if (data.settings.email) document.getElementById('siteEmail').value = data.settings.email;
+            if (data.settings.address) document.getElementById('siteAddress').value = data.settings.address;
+        }
+        
+        function saveSettings() {
+            data.settings = {
+                siteName: document.getElementById('siteName').value,
+                phone: document.getElementById('sitePhone').value,
+                email: document.getElementById('siteEmail').value,
+                address: document.getElementById('siteAddress').value
+            };
+            saveData('settings');
+            showNotification('✅ Настройки сохранены!');
+        }
+        
+        // ===== СОХРАНЕНИЕ =====
+        function saveData(key) {
+            const storageKey = key === 'parentsFaq' ? 'djd_parents_faq' :
+                              key === 'news' ? 'djd_news_posts' :
+                              `djd_${key}`;
+            localStorage.setItem(storageKey, JSON.stringify(data[key]));
+            updateDashboard();
+        }
+        
+        // ===== ЭКСПОРТ/ИМПОРТ =====
+        function exportAllData() {
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dzd_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            showNotification('💾 Данные экспортированы!');
+        }
+        
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const imported = JSON.parse(ev.target.result);
+                    Object.keys(imported).forEach(key => {
+                        data[key] = imported[key];
+                        const storageKey = key === 'parentsFaq' ? 'djd_parents_faq' :
+                                          key === 'news' ? 'djd_news_posts' :
+                                          `djd_${key}`;
+                        localStorage.setItem(storageKey, JSON.stringify(imported[key]));
+                    });
+                    showNotification('✅ Данные импортированы!');
+                    updateDashboard();
+                } catch (err) {
+                    showNotification('❌ Ошибка импорта!', true);
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function resetAllData() {
+            if (confirm('⚠️ ВНИМАНИЕ! Все данные будут удалены. Продолжить?')) {
+                if (confirm('Вы уверены? Это действие нельзя отменить!')) {
+                    Object.keys(data).forEach(key => {
+                        const storageKey = key === 'parentsFaq' ? 'djd_parents_faq' :
+                                          key === 'news' ? 'djd_news_posts' :
+                                          `djd_${key}`;
+                        localStorage.removeItem(storageKey);
+                    });
+                    location.reload();
+                }
+            }
+        }
+        
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        updateDashboard();
+        
+        // Автоматически загружаем about.html при открытии редактора
+        setTimeout(() => {
+            loadPageToEditor();
+        }, 500);
+    </script>
+</body>
+</html>

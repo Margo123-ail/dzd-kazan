@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Видео - ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        /* Шапка */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo img { width: 120px; height: 120px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #003366; }
+        .menu { display: flex; list-style: none; gap: 15px; flex-wrap: wrap; }
+        .menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .menu a:hover { color: #003366; background: rgba(0, 51, 102, 0.1); }
+        .menu a.active { color: white; background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%); }
+        
+        /* Заголовок страницы */
+        .page-header {
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+            margin-top: 140px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .page-header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .page-header p {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Фильтры */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .filter-btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 10px;
+            background: white;
+            color: #003366;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .filter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            color: white;
+        }
+        
+        /* Сетка видео */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .video-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .video-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .video-thumbnail {
+            position: relative;
+            height: 220px;
+            background: linear-gradient(135deg, #0066cc 0%, #003366 100%);
+            overflow: hidden;
+        }
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .video-card:hover .video-thumbnail img {
+            transform: scale(1.1);
+        }
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 102, 0, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .video-card:hover .play-button {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: rgba(255, 102, 0, 1);
+        }
+        .video-duration {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .video-category {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .video-info { padding: 25px; }
+        .video-info h3 {
+            color: #003366;
+            font-size: 20px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .video-info p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .video-date { color: #999; font-size: 13px; }
+        .video-views { color: #ff6600; font-size: 13px; font-weight: bold; }
+        
+        /* Модальное окно */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        .video-modal.active { display: flex; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            max-width: 90%;
+            width: 900px;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        }
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .modal-title {
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+        }
+        
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+        .empty-state .icon { font-size: 80px; margin-bottom: 20px; }
+        .empty-state h3 { font-size: 24px; margin-bottom: 10px; color: #003366; }
+        
+        /* Плавающая кнопка */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            color: white;
+            padding: 20px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 10px 30px rgba(204, 0, 0, 0.5);
+            z-index: 999;
+            transition: all 0.3s;
+        }
+        .floating-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(204, 0, 0, 0.7);
+        }
+        
+        @media (max-width: 1200px) {
+            .menu { gap: 10px; }
+            .menu a { font-size: 13px; padding: 5px 8px; }
+        }
+        @media (max-width: 992px) {
+            nav { flex-direction: column; gap: 15px; }
+            .menu { justify-content: center; }
+        }
+        @media (max-width: 768px) {
+            .menu { display: none; }
+            .page-header h1 { font-size: 32px; }
+            .video-grid { grid-template-columns: 1fr; }
+            .modal-content { width: 95%; }
+            .floating-btn { padding: 15px 25px; font-size: 16px; bottom: 20px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="window.location.href='index.html'">
+                <img src="images/logo.png" alt="ДЖД Логотип">
+                <span class="logo-text">ДЖД КАЗАНЬ</span>
+            </div>
+            <ul class="menu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="about.html">О нас</a></li>
+                <li><a href="students.html">Учащимся</a></li>
+                <li><a href="passengers.html">Пассажирам</a></li>
+                <li><a href="route-map.html">🗺️ Маршрут</a></li>
+                <li><a href="gallery.html">📸 Галерея</a></li>
+                <li><a href="schedule.html">📅 Расписание</a></li>
+                <li><a href="enroll.html">📝 Запись</a></li>
+                <li><a href="history-timeline.html">📜 История</a></li>
+                <li><a href="history.html">📖 Наша история</a></li>
+                <li><a href="video.html" class="active">🎬 Видео</a></li>
+                <li><a href="parents.html">👨👧 Родителям</a></li>
+                <li><a href="feedback.html">💬 Отзывы</a></li>
+                <li><a href="additional.html">Дополнительно</a></li>
+                <li><a href="news.html">Новости</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="page-header">
+        <h1>🎬 ВИДЕО ДЖД КАЗАНЬ</h1>
+        <p>Репортажи, экскурсии и яркие моменты из жизни ДЖД</p>
+    </div>
+    
+    <div class="container">
+        <!-- Фильтры -->
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterVideos('all', this)">🎬 Все видео</button>
+            <button class="filter-btn" onclick="filterVideos('reports', this)">📰 Репортажи</button>
+            <button class="filter-btn" onclick="filterVideos('excursions', this)">🗺️ Экскурсии</button>
+            <button class="filter-btn" onclick="filterVideos('events', this)">🎉 Мероприятия</button>
+            <button class="filter-btn" onclick="filterVideos('interviews', this)">🎤 Интервью</button>
+        </div>
+        
+        <!-- Сетка видео -->
+        <div class="video-grid" id="videoGrid"></div>
+    </div>
+    
+    <!-- Модальное окно -->
+    <div class="video-modal" id="videoModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="video-wrapper" id="videoWrapper"></div>
+            <div class="modal-title" id="modalTitle"></div>
+        </div>
+    </div>
+    
+    <!-- Плавающая кнопка -->
+    <a href="enroll.html" class="floating-btn">📝 Записаться</a>
+
+    <script>
+        // ===== ДЕФОЛТНЫЕ ВИДЕО =====
+        const defaultVideos = [
+            { id: 1, title: "Открытие сезона ДЖД 2026", description: "Торжественное открытие летнего сезона на Детской железной дороге Казани. Первые пассажиры, юные машинисты и праздничная атмосфера.", category: "events", categoryName: "Мероприятия", date: "15.05.2026", views: 2300, duration: "5:42", thumbnail: "https://via.placeholder.com/400x250/0066cc/ffffff?text=Открытие+сезона", videoUrl: "https://vkvideo.ru/video_ext.php?oid=-44087190&id=456240842" },
+            { id: 2, title: "Экскурсия по депо ДЖД", description: "Полная экскурсия по депо Детской железной дороги. Показываем поезда, вагоны и рассказываем о работе юных железнодорожников.", category: "excursions", categoryName: "Экскурсии", date: "10.05.2026", views: 1800, duration: "8:15", thumbnail: "https://via.placeholder.com/400x250/ff6600/ffffff?text=Экскурсия+по+депо", videoUrl: "https://vkvideo.ru/video_ext.php?oid=-44087190&id=456240842" },
+            { id: 3, title: "Репортаж: Один день машиниста", description: "Следуем за юным машинистом весь день. От утреннего инструктажа до последнего рейса. Реальная работа на ДЖД.", category: "reports", categoryName: "Репортажи", date: "05.05.2026", views: 3100, duration: "12:30", thumbnail: "https://via.placeholder.com/400x250/cc0000/ffffff?text=Один+день+машиниста", videoUrl: "https://vkvideo.ru/video_ext.php?oid=-44087190&id=456240842" },
+            { id: 4, title: "Интервью с начальником ДЖД", description: "Черемнов Игорь Александрович рассказывает о планах развития ДЖД, новых проектах и достижениях юных железнодорожников.", category: "interviews", categoryName: "Интервью", date: "01.05.2026", views: 1500, duration: "15:20", thumbnail: "https://via.placeholder.com/400x250/003366/ffffff?text=Интервью+с+начальником", videoUrl: "https://vkvideo.ru/video_ext.php?oid=-44087190&id=456240842" },
+            { id: 5, title: "Праздник первого звонка на ДЖД", description: "Торжественная линейка, посвящённая началу учебного года на Детской железной дороге. Поздравления и пожелания.", category: "events", categoryName: "Мероприятия", date: "01.09.2025", views: 2700, duration: "6:45", thumbnail: "https://via.placeholder.com/400x250/ff6600/ffffff?text=Первый+звонок", videoUrl: "https://vkvideo.ru/video_ext.php?oid=-44087190&id=456240842" },
+            { id: 6, title: "Как стать машинистом?", description: "Пошаговая инструкция для тех, кто хочет стать юным машинистом. Рассказываем о требованиях, обучении и перспективах.", category: "excursions", categoryName: "Экскурсии", date: "25.04.2026", views: 4200, duration: "10:05", thumbnail: "https://via.placeholder.com/400x250/0066cc/ffffff?text=Как+стать+машинистом", videoUrl: "https://vkvideo.ru/video_ext.php?oid=-44087190&id=456240842" },
+            { id: 7, title: "Репортаж: Работа проводника", description: "Показываем будни юного проводника. Проверка билетов, помощь пассажирам и ответственная работа в вагоне.", category: "reports", categoryName: "Репортажи", date: "20.04.2026", views: 1900, duration: "7:30", thumbnail: "https://via.placeholder.com/400x250/cc0000/ffffff?text=Работа+проводника", videoUrl: "https://vkvideo.ru/video_ext.php?oid=-44087190&id=456240842" },
+            { id: 8, title: "Интервью с выпускником ДЖД", description: "Алексей Смирнов, выпуск 2015 года, сейчас работает машинистом в РЖД. Делится воспоминаниями о ДЖД и даёт советы.", category: "interviews", categoryName: "Интервью", date: "15.04.2026", views: 2100, duration: "18:45", thumbnail: "https://via.placeholder.com/400x250/003366/ffffff?text=Интервью+с+выпускником", videoUrl: "https://vkvideo.ru/video_ext.php?oid=-44087190&id=456240842" },
+            { id: 9, title: "Соревнования юных железнодорожников", description: "Ежегодные соревнования между командами ДЖД. Эстафеты, конкурсы профессионального мастерства и награждение.", category: "events", categoryName: "Мероприятия", date: "10.04.2026", views: 3500, duration: "9:20", thumbnail: "https://via.placeholder.com/400x250/ff6600/ffffff?text=Соревнования", videoUrl: "https://vkvideo.ru/video_ext.php?oid=-44087190&id=456240842" }
+        ];
+        
+        // ===== ЗАГРУЗКА ВИДЕО =====
+        function loadVideos() {
+            const adminVideos = JSON.parse(localStorage.getItem('djd_videos') || '[]');
+            const adminIds = new Set(adminVideos.map(v => v.id));
+            const combined = [...adminVideos];
+            defaultVideos.forEach(v => {
+                if (!adminIds.has(v.id)) combined.push(v);
+            });
+            return combined;
+        }
+        
+        let allVideos = loadVideos();
+        let currentFilter = 'all';
+        let filteredVideos = [...allVideos];
+        
+        // ===== ФОРМАТИРОВАНИЕ ПРОСМОТРОВ =====
+        function formatViews(views) {
+            if (views >= 1000) {
+                return (views / 1000).toFixed(1).replace('.0', '') + 'K';
+            }
+            return views.toString();
+        }
+        
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        function init() {
+            renderVideos(allVideos);
+        }
+        
+        // ===== ОТРИСОВКА =====
+        function renderVideos(videosToRender) {
+            const grid = document.getElementById('videoGrid');
+            grid.innerHTML = '';
+            
+            if (videosToRender.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🎬</div>
+                        <h3>Видео не найдены</h3>
+                        <p>Попробуйте выбрать другую категорию</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            videosToRender.forEach(video => {
+                const card = createVideoCard(video);
+                grid.appendChild(card);
+            });
+        }
+        
+        // ===== КАРТОЧКА ВИДЕО =====
+        function createVideoCard(video) {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            card.onclick = () => openVideo(video);
+            
+            const fallback = `https://via.placeholder.com/400x250/0066cc/ffffff?text=${encodeURIComponent(video.title)}`;
+            
+            card.innerHTML = `
+                <div class="video-thumbnail">
+                    <img src="${video.thumbnail || ''}" alt="${video.title}" loading="lazy" onerror="this.src='${fallback}'">
+                    <div class="play-button">▶</div>
+                    <div class="video-duration">${video.duration || '0:00'}</div>
+                    <div class="video-category">${video.categoryName}</div>
+                </div>
+                <div class="video-info">
+                    <h3>${video.title}</h3>
+                    <p>${video.description || ''}</p>
+                    <div class="video-meta">
+                        <span class="video-date">📅 ${video.date}</span>
+                        <span class="video-views">👁️ ${formatViews(video.views || 0)} просмотров</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // ===== ФИЛЬТРАЦИЯ =====
+        function filterVideos(category, btn) {
+            currentFilter = category;
+            
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            
+            if (category === 'all') {
+                filteredVideos = [...allVideos];
+            } else {
+                filteredVideos = allVideos.filter(v => v.category === category);
+            }
+            
+            renderVideos(filteredVideos);
+        }
+        
+        // ===== ОТКРЫТИЕ ВИДЕО =====
+        function openVideo(video) {
+            const modal = document.getElementById('videoModal');
+            const wrapper = document.getElementById('videoWrapper');
+            const title = document.getElementById('modalTitle');
+            
+            wrapper.innerHTML = `<iframe src="${video.videoUrl}" allowfullscreen></iframe>`;
+            title.textContent = video.title;
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Увеличиваем счётчик просмотров
+            video.views = (video.views || 0) + 1;
+            const idx = allVideos.findIndex(v => v.id === video.id);
+            if (idx !== -1) {
+                allVideos[idx] = video;
+                localStorage.setItem('djd_videos', JSON.stringify(
+                    allVideos.filter(v => !defaultVideos.find(d => d.id === v.id))
+                ));
+            }
+        }
+        
+        // ===== ЗАКРЫТИЕ МОДАЛКИ =====
+        function closeModal() {
+            const modal = document.getElementById('videoModal');
+            const wrapper = document.getElementById('videoWrapper');
+            
+            wrapper.innerHTML = '';
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            
+            // Обновляем счётчики просмотров
+            renderVideos(filteredVideos);
+        }
+        
+        // Закрытие по клику на фон
+        document.getElementById('videoModal').addEventListener('click', (e) => {
+            if (e.target.id === 'videoModal') closeModal();
+        });
+        
+        // Закрытие по Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('videoModal').classList.contains('active')) {
+                closeModal();
+            }
+        });
+        
+        // ===== ЗАПУСК =====
+        window.addEventListener('load', init);
+        
+        // Обновление при возврате
+        window.addEventListener('pageshow', () => {
+            allVideos = loadVideos();
+            filterVideos(currentFilter, document.querySelector('.filter-btn.active'));
+        });
+    </script>
+</body>
+</html>

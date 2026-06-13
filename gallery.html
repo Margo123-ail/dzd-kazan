@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фотогалерея - ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        /* Шапка */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo img { width: 120px; height: 120px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #003366; }
+        .menu { display: flex; list-style: none; gap: 15px; flex-wrap: wrap; }
+        .menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .menu a:hover { color: #003366; background: rgba(0, 51, 102, 0.1); }
+        .menu a.active { color: white; background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%); }
+        
+        /* Заголовок страницы */
+        .page-header {
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+            margin-top: 140px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .page-header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .page-header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        /* Фильтры */
+        .filters {
+            max-width: 1200px;
+            margin: 40px auto 20px;
+            padding: 0 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .filter-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #003366;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .filter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            color: white;
+        }
+        
+        /* Галерея */
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .gallery-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            background: white;
+        }
+        .gallery-item:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        .gallery-item .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+        .gallery-item:hover .overlay {
+            transform: translateY(0);
+        }
+        .gallery-item .overlay h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .gallery-item .overlay p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .gallery-item .category-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2;
+        }
+        
+        /* Лайтбокс */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        .lightbox.active { display: flex; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 10px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .lightbox-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .lightbox-nav:hover { background: rgba(255,255,255,0.3); }
+        .lightbox-prev { left: -80px; }
+        .lightbox-next { right: -80px; }
+        .lightbox-caption {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        
+        /* Счетчик */
+        .counter {
+            text-align: center;
+            color: #666;
+            font-size: 16px;
+            margin: 20px 0;
+        }
+        
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+        .empty-state .icon { font-size: 80px; margin-bottom: 20px; }
+        .empty-state h3 { font-size: 24px; margin-bottom: 10px; color: #003366; }
+        
+        /* Плавающая кнопка */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            color: white;
+            padding: 20px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 10px 30px rgba(204, 0, 0, 0.5);
+            z-index: 999;
+            transition: transform 0.3s;
+        }
+        .floating-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(204, 0, 0, 0.7);
+        }
+        
+        @media (max-width: 1200px) {
+            .menu { gap: 10px; }
+            .menu a { font-size: 13px; padding: 5px 8px; }
+        }
+        @media (max-width: 992px) {
+            nav { flex-direction: column; gap: 15px; }
+            .menu { justify-content: center; }
+        }
+        @media (max-width: 768px) {
+            .menu { display: none; }
+            .page-header h1 { font-size: 28px; }
+            .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+            .lightbox-nav { display: none; }
+            .floating-btn { padding: 15px 25px; font-size: 16px; bottom: 20px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="window.location.href='index.html'">
+                <img src="images/logo.png" alt="ДЖД Логотип">
+                <span class="logo-text">ДЖД КАЗАНЬ</span>
+            </div>
+            <ul class="menu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="about.html">О нас</a></li>
+                <li><a href="students.html">Учащимся</a></li>
+                <li><a href="passengers.html">Пассажирам</a></li>
+                <li><a href="route-map.html">🗺️ Маршрут</a></li>
+                <li><a href="gallery.html" class="active">📸 Галерея</a></li>
+                <li><a href="schedule.html">📅 Расписание</a></li>
+                <li><a href="enroll.html">📝 Запись</a></li>
+                <li><a href="history-timeline.html">📜 История</a></li>
+                <li><a href="video.html">🎬 Видео</a></li>
+                <li><a href="parents.html">👨‍👧 Родителям</a></li>
+                <li><a href="feedback.html">💬 Отзывы</a></li>
+                <li><a href="additional.html">Дополнительно</a></li>
+                <li><a href="news.html">Новости</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="page-header">
+        <h1>📸 ФОТОГАЛЕРЕЯ ДЖД КАЗАНЬ</h1>
+        <p>Яркие моменты из жизни детской железной дороги</p>
+    </div>
+    
+    <!-- Фильтры -->
+    <div class="filters">
+        <button class="filter-btn active" onclick="filterGallery('all', this)">Все фото</button>
+        <button class="filter-btn" onclick="filterGallery('students', this)">Ученики</button>
+        <button class="filter-btn" onclick="filterGallery('teachers', this)">Преподаватели</button>
+        <button class="filter-btn" onclick="filterGallery('events', this)">Мероприятия</button>
+        <button class="filter-btn" onclick="filterGallery('trains', this)">Поезда</button>
+    </div>
+    
+    <!-- Счетчик -->
+    <div class="counter" id="counter">Всего фото: 0</div>
+    
+    <!-- Галерея -->
+    <div class="gallery-container">
+        <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+    
+    <!-- Лайтбокс -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="closeLightbox()">×</button>
+            <button class="lightbox-nav lightbox-prev" onclick="changeImage(-1)">‹</button>
+            <button class="lightbox-nav lightbox-next" onclick="changeImage(1)">›</button>
+            <img id="lightboxImg" src="" alt="">
+            <div class="lightbox-caption" id="lightboxCaption"></div>
+        </div>
+    </div>
+    
+    <!-- Плавающая кнопка -->
+    <a href="enroll.html" class="floating-btn">📝 Записаться</a>
+
+    <script>
+        // ===== ДЕФОЛТНЫЕ ФОТО (если в админке пусто) =====
+        const defaultPhotos = [
+            { id: 1, src: 'images/ученики/student-1.jpg', title: 'Юные машинисты', category: 'students', desc: 'Ученики за работой' },
+            { id: 2, src: 'images/ученики/student-2.jpg', title: 'Практика в кабине', category: 'students', desc: 'Обучение управлению' },
+            { id: 3, src: 'images/ученики/student-3.jpg', title: 'Первый рейс', category: 'students', desc: 'Настоящие эмоции' },
+            { id: 4, src: 'images/teachers/teacher-1.png', title: 'Наши преподаватели', category: 'teachers', desc: 'Опытные наставники' },
+            { id: 5, src: 'images/teachers/teacher-2.jpg', title: 'Инструктаж', category: 'teachers', desc: 'Обучение профессии' },
+            { id: 6, src: 'images/профессии/machinist-1.jpg', title: 'Машинист за работой', category: 'events', desc: 'Управление поездом' },
+            { id: 7, src: 'images/профессии/volunteer-1.jpg', title: 'Волонтёры ДЖД', category: 'events', desc: 'Помощь пассажирам' },
+            { id: 8, src: 'images/профессии/track-1.jpg', title: 'Осмотр путей', category: 'events', desc: 'Работа путейца' },
+            { id: 9, src: 'images/история/history-1.jpg', title: 'Торжественное открытие', category: 'events', desc: 'Важное событие' },
+            { id: 10, src: 'images/профессии/carriage-1.jpg', title: 'Наш поезд', category: 'trains', desc: 'Состав ДЖД' },
+            { id: 11, src: 'images/профессии/scb-1.jpg', title: 'Пост СЦБ', category: 'trains', desc: 'Сигнализация' },
+            { id: 12, src: 'images/ученики/student-5.jpg', title: 'Ученики на практике', category: 'students', desc: 'Работа в команде' }
+        ];
+        
+        // ===== ЗАГРУЗКА ФОТО =====
+        // Объединяем: фото из админки + дефолтные (без дубликатов)
+        function loadAllPhotos() {
+            const adminPhotos = JSON.parse(localStorage.getItem('djd_photos') || '[]');
+            const adminIds = new Set(adminPhotos.map(p => p.id));
+            
+            // Добавляем дефолтные, если их нет в админке
+            const combined = [...adminPhotos];
+            defaultPhotos.forEach(p => {
+                if (!adminIds.has(p.id)) {
+                    combined.push(p);
+                }
+            });
+            
+            return combined;
+        }
+        
+        let allPhotos = loadAllPhotos();
+        let currentFilter = 'all';
+        let currentImageIndex = 0;
+        let filteredPhotos = [...allPhotos];
+        
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        function initGallery() {
+            renderGallery(allPhotos);
+            updateCounter(allPhotos.length);
+        }
+        
+        // ===== ОТРИСОВКА ГАЛЕРЕИ =====
+        function renderGallery(photosToRender) {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '';
+            
+            if (photosToRender.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📸</div>
+                        <h3>В этой категории пока нет фото</h3>
+                        <p>Попробуйте выбрать другую категорию</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            photosToRender.forEach((photo, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.onclick = () => openLightbox(index);
+                
+                // Определяем URL изображения
+                const imgSrc = photo.url || photo.src;
+                const fallback = `https://via.placeholder.com/400x300/0066cc/ffffff?text=${encodeURIComponent(photo.title)}`;
+                
+                item.innerHTML = `
+                    <img src="${imgSrc}" alt="${photo.title}" loading="lazy" onerror="this.src='${fallback}'">
+                    <span class="category-badge">${getCategoryName(photo.category)}</span>
+                    <div class="overlay">
+                        <h3>${photo.title}</h3>
+                        <p>${photo.desc || ''}</p>
+                    </div>
+                `;
+                
+                grid.appendChild(item);
+            });
+        }
+        
+        // ===== ФИЛЬТРАЦИЯ =====
+        function filterGallery(category, btn) {
+            currentFilter = category;
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            
+            // Фильтруем фото
+            if (category === 'all') {
+                filteredPhotos = [...allPhotos];
+            } else {
+                filteredPhotos = allPhotos.filter(p => p.category === category);
+            }
+            
+            renderGallery(filteredPhotos);
+            updateCounter(filteredPhotos.length);
+        }
+        
+        // ===== НАЗВАНИЕ КАТЕГОРИИ =====
+        function getCategoryName(category) {
+            const names = {
+                'students': 'Ученики',
+                'teachers': 'Преподаватели',
+                'events': 'Мероприятия',
+                'trains': 'Поезда'
+            };
+            return names[category] || category;
+        }
+        
+        // ===== СЧЁТЧИК =====
+        function updateCounter(count) {
+            document.getElementById('counter').textContent = `Всего фото: ${count}`;
+        }
+        
+        // ===== ЛАЙТБОКС =====
+        function openLightbox(index) {
+            currentImageIndex = index;
+            const photo = filteredPhotos[index];
+            const imgSrc = photo.url || photo.src;
+            
+            document.getElementById('lightboxImg').src = imgSrc;
+            document.getElementById('lightboxCaption').textContent = `${photo.title}${photo.desc ? ' - ' + photo.desc : ''}`;
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        function changeImage(direction) {
+            currentImageIndex += direction;
+            
+            if (currentImageIndex < 0) {
+                currentImageIndex = filteredPhotos.length - 1;
+            } else if (currentImageIndex >= filteredPhotos.length) {
+                currentImageIndex = 0;
+            }
+            
+            const photo = filteredPhotos[currentImageIndex];
+            const imgSrc = photo.url || photo.src;
+            document.getElementById('lightboxImg').src = imgSrc;
+            document.getElementById('lightboxCaption').textContent = `${photo.title}${photo.desc ? ' - ' + photo.desc : ''}`;
+        }
+        
+        // Закрытие по клику на фон
+        document.getElementById('lightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox') closeLightbox();
+        });
+        
+        // Навигация клавишами
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('lightbox').classList.contains('active')) {
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') changeImage(-1);
+                if (e.key === 'ArrowRight') changeImage(1);
+            }
+        });
+        
+        // ===== ЗАПУСК =====
+        window.addEventListener('load', initGallery);
+        
+        // Обновление при возврате на страницу (если добавили фото в админке)
+        window.addEventListener('pageshow', () => {
+            allPhotos = loadAllPhotos();
+            filterGallery(currentFilter, document.querySelector('.filter-btn.active'));
+        });
+    </script>
+</body>
+</html>

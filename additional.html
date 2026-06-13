@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дополнительно - ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        header { position: fixed; top: 0; width: 100%; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); z-index: 1000; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 8px 5%; max-width: 1400px; margin: 0 auto; }
+        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo img { width: 120px; height: 120px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #003366; }
+        .menu { display: flex; list-style: none; gap: 15px; flex-wrap: wrap; }
+        .menu a { text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; font-size: 14px; padding: 5px 10px; border-radius: 5px; }
+        .menu a:hover { color: #003366; background: rgba(0, 51, 102, 0.1); }
+        .menu a.active { color: white; background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%); }
+        .main-content { margin-top: 140px; padding: 40px 20px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+        .page-header { text-align: center; margin-bottom: 60px; color: white; }
+        .page-header h1 { font-size: 56px; margin-bottom: 15px; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .page-header p { font-size: 24px; opacity: 0.9; }
+        .teachers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .teacher-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s; }
+        .teacher-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .teacher-photo { width: 100%; height: 300px; object-fit: cover; background: #e0e0e0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .teacher-photo img { width: 100%; height: 100%; object-fit: cover; }
+        .teacher-info { padding: 25px; text-align: center; }
+        .teacher-info h3 { font-size: 20px; color: #003366; margin-bottom: 10px; }
+        .teacher-position { background: linear-gradient(135deg, #cc0000 0%, #990000 100%); color: white; padding: 8px 15px; border-radius: 20px; font-size: 12px; display: inline-block; margin-top: 10px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { background: white; border-radius: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; background: #cc0000; color: white; border: none; border-radius: 50%; font-size: 24px; cursor: pointer; z-index: 10; }
+        .modal-close:hover { transform: rotate(90deg) scale(1.1); }
+        .modal-header { background: linear-gradient(135deg, #003366 0%, #001a33 100%); color: white; padding: 40px; text-align: center; }
+        .modal-photo { width: 150px; height: 150px; border-radius: 50%; margin: 0 auto 20px; background: white; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 5px solid #cc0000; }
+        .modal-photo img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-header h2 { font-size: 28px; margin-bottom: 10px; }
+        .modal-body { padding: 40px; }
+        .characteristics { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .characteristics h4 { color: #cc0000; margin-bottom: 10px; }
+        .characteristics ul { list-style: none; padding-left: 0; }
+        .characteristics li { padding: 8px 0; padding-left: 25px; position: relative; color: #555; }
+        .characteristics li::before { content: '✓'; position: absolute; left: 0; color: #28a745; font-weight: bold; }
+        
+        /* Плавающая кнопка */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            color: white;
+            padding: 20px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 10px 30px rgba(255, 102, 0, 0.5);
+            z-index: 999;
+            transition: transform 0.3s;
+        }
+        .floating-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 102, 0, 0.7);
+        }
+        
+        @media (max-width: 1200px) {
+            .menu { gap: 10px; }
+            .menu a { font-size: 13px; padding: 5px 8px; }
+        }
+        @media (max-width: 992px) {
+            nav { flex-direction: column; gap: 15px; }
+            .menu { justify-content: center; }
+        }
+        @media (max-width: 768px) { 
+            .menu { display: none; }
+            .page-header h1 { font-size: 32px; }
+            .teachers-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="window.location.href='index.html'">
+                <img src="images/logo.png" alt="ДЖД">
+                <span class="logo-text">ДЖД КАЗАНЬ</span>
+            </div>
+            <ul class="menu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="about.html">О нас</a></li>
+                <li><a href="students.html">Учащимся</a></li>
+                <li><a href="passengers.html">Пассажирам</a></li>
+                <li><a href="route-map.html">🗺️ Маршрут</a></li>
+                <li><a href="gallery.html">📸 Галерея</a></li>
+                <li><a href="schedule.html">📅 Расписание</a></li>
+                <li><a href="enroll.html">📝 Запись</a></li>
+                <li><a href="history-timeline.html">📜 История</a></li>
+                <li><a href="video.html">🎬 Видео</a></li>
+                <li><a href="parents.html">👨‍👧 Родителям</a></li>
+                <li><a href="feedback.html">💬 Отзывы</a></li>
+                <li><a href="additional.html" class="active">Дополнительно</a></li>
+                <li><a href="news.html">Новости</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <!-- Плавающая кнопка "Записаться" -->
+    <a href="enroll.html" class="floating-btn">📝 Записаться</a>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1>👨‍🏫 Наши преподаватели</h1>
+            <p>Опытные профессионалы, которые готовят будущих железнодорожников</p>
+        </div>
+        <div class="teachers-grid" id="teachersGrid"></div>
+    </div>
+    <div id="modalContainer"></div>
+    <script>
+        const teachers = [
+            { id: 1, name: "Черемнов Игорь Александрович", pos: "Начальник ДЖД", img: "images/teachers/teacher-1.jpg", desc: "Опытный руководитель с многолетним стажем работы в железнодорожной отрасли.", traits: ["Высокий уровень организации", "Внимание к безопасности", "Наставнический подход", "Стратегическое мышление"] },
+            { id: 2, name: "Нестёркина Юлия Олеговна", pos: "Заместитель начальника", img: "images/teachers/teacher-2.jpg", desc: "Координирует учебный процесс и производственную деятельность ДЖД.", traits: ["Организаторские способности", "Педагогический талант", "Знание специфики РЖД", "Работа с молодёжью"] },
+            { id: 3, name: "Васильева Наталья Алексеевна", pos: "Ведущий методист", img: "images/teachers/teacher-3.jpg", desc: "Разрабатывает учебные программы и методические материалы для юных железнодорожников.", traits: ["Методическая грамотность", "Инновационный подход", "Системность", "Творческое мышление"] },
+            { id: 4, name: "Гудалина Елена Вениаминовна", pos: "Психолог 1 категории", img: "images/teachers/teacher-4.jpg", desc: "Помогает ребятам адаптироваться в коллективе и найти свой профессиональный путь.", traits: ["Эмпатия", "Профессионализм", "Индивидуальный подход", "Поддержка"] },
+            { id: 5, name: "Кукушкина Дарина Михайловна", pos: "Педагог", img: "images/teachers/teacher-5.jpg", desc: "Ведет практические занятия по специальности.", traits: ["Ответственность", "Терпение", "Умение объяснять", "Любовь к детям"] },
+            { id: 6, name: "Левина Наталья Евгеньевна", pos: "Педагог (СЦБ)", img: "images/teachers/teacher-6.jpg", desc: "Преподаватель с богатым опытом работы на детской железной дороге.", traits: ["Профессионализм", "Дисциплинированность", "Креативность", "Наставничество"] },
+            { id: 7, name: "Минсалимова Регина Альбертовна", pos: "Педагог (Путеец)", img: "images/teachers/teacher-7.jpg", desc: "Готовит будущих специалистов железнодорожного транспорта.", traits: ["Внимательность", "Педагогический такт", "Организованность", "Энергичность"] },
+            { id: 8, name: "Родионова Наталья Евгеньевна", pos: "Педагог (Вагонник)", img: "images/teachers/teacher-8.jpg", desc: "Наставник, передающий свои знания и опыт подрастающему поколению.", traits: ["Мудрость", "Опыт", "Доброта", "Требовательность"] },
+            { id: 9, name: "Тенишева Гузелия Шакуровна", pos: "Педагог (Движенец)", img: "images/teachers/teacher-9.jpg", desc: "Специалист высшей категории, эксперт в области железнодорожного дела.", traits: ["Экспертность", "Авторитет", "Наставничество", "Профессионализм"] },
+            { id: 10, name: "Жданова Наталья Николаевна", pos: "Педагог", img: "images/teachers/teacher-10.jpg", desc: "Педагог, вдохновляющий детей на новые достижения.", traits: ["Вдохновение", "Активность", "Позитив", "Профессионализм"] },
+            { id: 11, name: "Маргинова Екатерина Ивановна", pos: "Педагог", img: "images/teachers/teacher-11.jpg", desc: "Наставник, помогающий раскрыть потенциал каждого ученика.", traits: ["Индивидуальный подход", "Терпение", "Знание дела", "Поддержка"] },
+            { id: 12, name: "Кузьмина Наталья Николаевна", pos: "Педагог", img: "images/teachers/teacher-12.jpg", desc: "Опытный преподаватель, готовящий кадры для РЖД.", traits: ["Опыт", "Дисциплина", "Наставничество", "Профессионализм"] },
+            { id: 13, name: "Безумнов Вячеслав Владимирович", pos: "Специалист по культ.-массовой работе", img: "images/teachers/teacher-13.jpg", desc: "Организует мероприятия, праздники и культурную жизнь ДЖД.", traits: ["Креативность", "Организаторские способности", "Харизма", "Энергия"] }
+        ];
+        const grid = document.getElementById('teachersGrid');
+        const modalContainer = document.getElementById('modalContainer');
+        teachers.forEach(t => {
+            const card = document.createElement('div');
+            card.className = 'teacher-card';
+            card.onclick = () => openModal(t.id);
+            card.innerHTML = `<div class="teacher-photo"><img src="${t.img}" alt="${t.name}" onerror="this.parentElement.innerHTML='👤'"></div><div class="teacher-info"><h3>${t.name}</h3><div class="teacher-position">${t.pos}</div></div>`;
+            grid.appendChild(card);
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = `modal-${t.id}`;
+            modal.onclick = (e) => { if(e.target === modal) closeModal(t.id); };
+            modal.innerHTML = `<div class="modal-content"><button class="modal-close" onclick="closeModal(${t.id})">×</button><div class="modal-header"><div class="modal-photo"><img src="${t.img}" alt="${t.name}" onerror="this.parentElement.innerHTML='👤'"></div><h2>${t.name}</h2><p>${t.pos}</p></div><div class="modal-body"><h3>О преподавателе</h3><p>${t.desc}</p><div class="characteristics"><h4>Профессиональные качества:</h4><ul>${t.traits.map(tr => `<li>${tr}</li>`).join('')}</ul></div></div></div>`;
+            modalContainer.appendChild(modal);
+        });
+        function openModal(id) { document.getElementById(`modal-${id}`).classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeModal(id) { document.getElementById(`modal-${id}`).classList.remove('active'); document.body.style.overflow = 'auto'; }
+        document.addEventListener('keydown', e => { if(e.key === 'Escape') document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Маршрут - ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            min-height: 100vh;
+        }
+        
+        /* Шапка с меню */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo img { width: 120px; height: 120px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #003366; }
+        .menu { display: flex; list-style: none; gap: 15px; flex-wrap: wrap; }
+        .menu a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .menu a:hover { color: #003366; background: rgba(0, 51, 102, 0.1); }
+        .menu a.active { color: white; background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%); }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 160px 20px 40px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+        }
+        .header p {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+        
+        .route-map {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 50px;
+            margin-bottom: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .route-line {
+            position: relative;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 40px 0;
+        }
+        .route-svg {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        .station {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .station:hover { transform: translateY(-10px); }
+        .station-dot {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            border: 5px solid white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .station.active .station-dot {
+            background: linear-gradient(135deg, #00cc66 0%, #00994d 100%);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .station-name {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .station-time {
+            color: #ff6600;
+            font-size: 16px;
+        }
+        .station-info {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .station-info.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .station-info h2 {
+            color: #003366;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        .station-info img {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .station-info p {
+            color: #333;
+            font-size: 18px;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+        .train-animation {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            font-size: 40px;
+            transform: translateY(-50%);
+            animation: moveTrain 20s linear infinite;
+            z-index: 3;
+        }
+        @keyframes moveTrain {
+            0% { left: 0; }
+            100% { left: 100%; }
+        }
+        
+        /* Плавающая кнопка */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            color: white;
+            padding: 20px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 10px 30px rgba(204, 0, 0, 0.5);
+            z-index: 999;
+            transition: all 0.3s;
+        }
+        .floating-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(204, 0, 0, 0.7);
+        }
+        
+        @media (max-width: 1200px) {
+            .menu { gap: 10px; }
+            .menu a { font-size: 13px; padding: 5px 8px; }
+        }
+        @media (max-width: 992px) {
+            nav { flex-direction: column; gap: 15px; }
+            .menu { justify-content: center; }
+            .container { padding-top: 200px; }
+        }
+        @media (max-width: 768px) {
+            .menu { display: none; }
+            .container { padding-top: 160px; }
+            .header h1 { font-size: 32px; }
+            .route-map { padding: 25px 15px; }
+            .route-line { flex-direction: column; height: auto; gap: 30px; padding: 20px 0; }
+            .route-svg { display: none; }
+            .train-animation { display: none; }
+            .station-name { font-size: 16px; }
+            .station-info h2 { font-size: 24px; }
+            .station-info p { font-size: 15px; }
+            .floating-btn { padding: 15px 25px; font-size: 16px; bottom: 20px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="window.location.href='index.html'">
+                <img src="images/logo.png" alt="ДЖД Логотип">
+                <span class="logo-text">ДЖД КАЗАНЬ</span>
+            </div>
+            <ul class="menu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="about.html">О нас</a></li>
+                <li><a href="students.html">Учащимся</a></li>
+                <li><a href="passengers.html">Пассажирам</a></li>
+                <li><a href="route-map.html" class="active">🗺️ Маршрут</a></li>
+                <li><a href="gallery.html">📸 Галерея</a></li>
+                <li><a href="schedule.html">📅 Расписание</a></li>
+                <li><a href="enroll.html">📝 Запись</a></li>
+                <li><a href="history-timeline.html">📜 История</a></li>
+                <li><a href="history.html">📖 Наша история</a></li>
+                <li><a href="video.html">🎬 Видео</a></li>
+                <li><a href="parents.html">👨👧 Родителям</a></li>
+                <li><a href="feedback.html">💬 Отзывы</a></li>
+                <li><a href="additional.html">Дополнительно</a></li>
+                <li><a href="news.html">Новости</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🚂 МАРШРУТ ДЖД КАЗАНЬ</h1>
+            <p>Путешествие по четырём станциям</p>
+        </div>
+        
+        <div class="route-map">
+            <div class="route-line" id="routeLine">
+                <svg class="route-svg" viewBox="0 0 1000 10" preserveAspectRatio="none">
+                    <path d="M 0 5 Q 250 5, 250 5 T 500 5 T 750 5 T 1000 5" 
+                          stroke="#ff6600" stroke-width="8" fill="none" 
+                          stroke-dasharray="10,5"/>
+                </svg>
+                
+                <div class="train-animation">🚃</div>
+                
+                <!-- Станции будут добавлены через JS -->
+            </div>
+            
+            <div id="stationsInfo"></div>
+        </div>
+    </div>
+    
+    <!-- Плавающая кнопка "Записаться" -->
+    <a href="enroll.html" class="floating-btn">📝 Записаться</a>
+
+    <script>
+        // ===== ДЕФОЛТНЫЕ СТАНЦИИ =====
+        const defaultStations = [
+            { 
+                id: 1, 
+                icon: "🚉", 
+                name: "Молодёжная", 
+                time: "00:00", 
+                desc: "Начальная станция маршрута",
+                details: "Современное здание вокзала с панорамными окнами и синей крышей. Здесь начинается путешествие юных железнодорожников.",
+                info: "📍 Расположение: начало маршрута<br>⏱️ Время в пути: 15 минут до конечной<br>🎫 Платформа: 1",
+                image: "images/station-molodezhnaya.jpg",
+                fallback: "https://via.placeholder.com/600x400/0066cc/ffffff?text=Станция+Молодёжная"
+            },
+            { 
+                id: 2, 
+                icon: "🌳", 
+                name: "Берёзовая роща", 
+                time: "00:05", 
+                desc: "Остановочная платформа в сосновом лесу",
+                details: "Живописная станция окружена вековыми соснами и берёзами. Идеальное место для фотосессий!",
+                info: "📍 Расположение: 5 км от начала<br>🌲 Окружение: сосновый лес<br>🚏 Тип: остановочная платформа",
+                image: "images/station-berezovaya.jpg",
+                fallback: "https://via.placeholder.com/600x400/228b22/ffffff?text=Берёзовая+роща"
+            },
+            { 
+                id: 3, 
+                icon: "⚽", 
+                name: "Спортивная", 
+                time: "00:10", 
+                desc: "Спортивная платформа",
+                details: "Станция рядом со спортивными площадками. Часто здесь проходят мероприятия для юных железнодорожников.",
+                info: "📍 Расположение: 10 км от начала<br>⚽ Рядом: спортивные площадки<br>🎯 Мероприятия: регулярно",
+                image: "images/station-sportivnaya.jpg",
+                fallback: "https://via.placeholder.com/600x400/ff6600/ffffff?text=Спортивная"
+            },
+            { 
+                id: 4, 
+                icon: "💎", 
+                name: "Изумрудная", 
+                time: "00:15", 
+                desc: "Конечная станция маршрута",
+                details: "Современная станция с красивым зданием и синими элементами декора. Здесь поезд делает остановку на 15 минут перед обратным рейсом.",
+                info: "📍 Расположение: 15 км от начала<br>⏱️ Стоянка: 15 минут<br>🔄 Обратный рейс: через 15 мин",
+                image: "images/station-izumrudnaya.jpg",
+                fallback: "https://via.placeholder.com/600x400/50c878/ffffff?text=Изумрудная"
+            }
+        ];
+        
+        // ===== ЗАГРУЗКА СТАНЦИЙ =====
+        function loadStations() {
+            const saved = JSON.parse(localStorage.getItem('djd_stations') || 'null');
+            return (saved && saved.length > 0) ? saved : defaultStations;
+        }
+        
+        const stationsData = loadStations();
+        
+        // ===== ОТРИСОВКА СТАНЦИЙ =====
+        function renderStations() {
+            const routeLine = document.getElementById('routeLine');
+            const stationsInfo = document.getElementById('stationsInfo');
+            
+            // Сохраняем SVG и анимацию поезда
+            const svg = routeLine.querySelector('.route-svg');
+            const train = routeLine.querySelector('.train-animation');
+            
+            // Очищаем станции
+            routeLine.querySelectorAll('.station').forEach(s => s.remove());
+            stationsInfo.innerHTML = '';
+            
+            // Добавляем станции
+            stationsData.forEach((station, index) => {
+                // Станция на линии
+                const stationDiv = document.createElement('div');
+                stationDiv.className = 'station' + (index === 0 ? ' active' : '');
+                stationDiv.onclick = () => showStation(index);
+                stationDiv.innerHTML = `
+                    <div class="station-dot">${station.icon}</div>
+                    <div class="station-name">${station.name}</div>
+                    <div class="station-time">${station.time}</div>
+                `;
+                routeLine.appendChild(stationDiv);
+                
+                // Информация о станции
+                const infoDiv = document.createElement('div');
+                infoDiv.id = 'stationInfo' + index;
+                infoDiv.className = 'station-info' + (index === 0 ? ' active' : '');
+                infoDiv.innerHTML = `
+                    <h2>${station.icon} Станция "${station.name}"</h2>
+                    <img src="${station.image || ''}" alt="${station.name}" onerror="this.src='${station.fallback}'">
+                    <p><strong>${station.desc}</strong></p>
+                    <p>${station.details}</p>
+                    <p>${station.info}</p>
+                `;
+                stationsInfo.appendChild(infoDiv);
+            });
+        }
+        
+        // ===== ПЕРЕКЛЮЧЕНИЕ СТАНЦИЙ =====
+        function showStation(index) {
+            document.querySelectorAll('.station').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.station-info').forEach(i => i.classList.remove('active'));
+            
+            const stations = document.querySelectorAll('.station');
+            if (stations[index]) stations[index].classList.add('active');
+            
+            const info = document.getElementById('stationInfo' + index);
+            if (info) info.classList.add('active');
+        }
+        
+        // ===== АВТОАНИМАЦИЯ =====
+        let autoAnimationInterval;
+        function startAutoAnimation() {
+            let currentIndex = 0;
+            autoAnimationInterval = setInterval(() => {
+                currentIndex = (currentIndex + 1) % stationsData.length;
+                showStation(currentIndex);
+            }, 5000);
+        }
+        
+        // Останавливаем автоанимацию при клике
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.station')) {
+                clearInterval(autoAnimationInterval);
+            }
+        });
+        
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        window.addEventListener('load', () => {
+            renderStations();
+            startAutoAnimation();
+        });
+        
+        // Обновление при возврате (если в админке изменили станции)
+        window.addEventListener('pageshow', () => {
+            const newStations = loadStations();
+            if (JSON.stringify(newStations) !== JSON.stringify(stationsData)) {
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

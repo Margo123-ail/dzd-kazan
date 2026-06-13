@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пассажирам - ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        header { position: fixed; top: 0; width: 100%; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); z-index: 1000; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 8px 5%; max-width: 1400px; margin: 0 auto; flex-wrap: wrap; }
+        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo img { width: 120px; height: 120px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #003366; }
+        .menu { display: flex; list-style: none; gap: 15px; flex-wrap: wrap; }
+        .menu a { text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; font-size: 14px; padding: 5px 10px; border-radius: 5px; }
+        .menu a:hover { color: #003366; background: rgba(0, 51, 102, 0.1); }
+        .menu a.active { color: white; background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%); }
+        
+        .main-content { margin-top: 140px; padding: 40px 20px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+        .page-header { text-align: center; margin-bottom: 60px; }
+        .page-header h1 { font-size: 56px; color: #003366; margin-bottom: 15px; text-transform: uppercase; }
+        
+        .map-section { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 60px; }
+        .map-section h2 { font-size: 36px; color: #003366; margin-bottom: 30px; text-align: center; }
+        #map { width: 100%; height: 500px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        .stations-info { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .station-card { background: linear-gradient(135deg, #003366 0%, #001a33 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; transition: all 0.3s; }
+        .station-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .station-card h3 { font-size: 24px; margin-bottom: 15px; }
+        
+        .tables-section { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 60px; }
+        .table-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .table-header { background: linear-gradient(135deg, #cc0000 0%, #990000 100%); color: white; padding: 25px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #003366; color: white; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid #e0e0e0; }
+        .time { font-weight: bold; color: #cc0000; font-size: 18px; }
+        .price { font-weight: bold; color: #003366; font-size: 18px; }
+        .note { background: #fff3cd; padding: 20px; border-left: 4px solid #ff6600; margin-top: 20px; border-radius: 5px; }
+        
+        .rules-section { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 60px; }
+        .rules-section h2 { font-size: 36px; color: #003366; margin-bottom: 30px; text-align: center; }
+        .rule-item { background: #f8f9fa; padding: 25px; border-radius: 15px; border-left: 5px solid #cc0000; cursor: pointer; transition: all 0.3s; margin-bottom: 15px; }
+        .rule-item:hover { transform: translateX(10px); box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .rule-item h4 { font-size: 20px; color: #003366; margin-bottom: 10px; }
+        .rule-content { display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #e0e0e0; font-size: 16px; line-height: 1.8; color: #555; }
+        .rule-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .buy-ticket-section { background: linear-gradient(135deg, #cc0000 0%, #990000 100%); padding: 60px 40px; border-radius: 20px; text-align: center; color: white; box-shadow: 0 10px 40px rgba(204,0,0,0.3); margin-bottom: 40px; }
+        .buy-ticket-section h2 { font-size: 36px; margin-bottom: 15px; }
+        .buy-ticket-section p { font-size: 18px; margin-bottom: 20px; }
+        .buy-btn { display: inline-block; padding: 25px 60px; background: white; color: #cc0000; text-decoration: none; border-radius: 50px; font-size: 22px; font-weight: bold; transition: all 0.3s; margin-top: 20px; }
+        .buy-btn:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+        
+        /* Плавающая кнопка */
+        .floating-btn { position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #cc0000 0%, #990000 100%); color: white; padding: 20px 35px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 18px; box-shadow: 0 10px 30px rgba(204, 0, 0, 0.5); z-index: 999; transition: all 0.3s; }
+        .floating-btn:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 15px 40px rgba(204, 0, 0, 0.7); }
+        
+        @media (max-width: 1200px) {
+            .menu { gap: 10px; }
+            .menu a { font-size: 13px; padding: 5px 8px; }
+        }
+        @media (max-width: 992px) {
+            nav { flex-direction: column; gap: 15px; }
+            .menu { justify-content: center; }
+        }
+        @media (max-width: 768px) { 
+            .menu { display: none; } 
+            .tables-section, .stations-info { grid-template-columns: 1fr; }
+            .page-header h1 { font-size: 32px; }
+            #map { height: 300px; }
+            .floating-btn { padding: 15px 25px; font-size: 16px; bottom: 20px; right: 20px; }
+            .buy-btn { padding: 18px 40px; font-size: 18px; }
+        }
+    </style>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="window.location.href='index.html'">
+                <img src="images/logo.png" alt="ДЖД">
+                <span class="logo-text">ДЖД КАЗАНЬ</span>
+            </div>
+            <ul class="menu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="about.html">О нас</a></li>
+                <li><a href="students.html">Учащимся</a></li>
+                <li><a href="passengers.html" class="active">🚂 Пассажирам</a></li>
+                <li><a href="route-map.html">🗺️ Маршрут</a></li>
+                <li><a href="gallery.html">📸 Галерея</a></li>
+                <li><a href="schedule.html">📅 Расписание</a></li>
+                <li><a href="enroll.html">📝 Запись</a></li>
+                <li><a href="history-timeline.html">📜 История</a></li>
+                <li><a href="history.html">📖 Наша история</a></li>
+                <li><a href="video.html">🎬 Видео</a></li>
+                <li><a href="parents.html">👨👧 Родителям</a></li>
+                <li><a href="feedback.html">💬 Отзывы</a></li>
+                <li><a href="additional.html">Дополнительно</a></li>
+                <li><a href="news.html">Новости</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1>🚂 Пассажирам</h1>
+        </div>
+        
+        <div class="map-section">
+            <h2>📍 Карта маршрута</h2>
+            <div id="map"></div>
+            <div class="stations-info">
+                <div class="station-card">
+                    <h3>🚉 ст. Молодёжная</h3>
+                    <p>г. Казань, ул. Алтынова, 4А<br>пос. Залесный</p>
+                </div>
+                <div class="station-card">
+                    <h3>💎 ст. Изумрудная</h3>
+                    <p>Юдинский карьер<br>оз. Карьер</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tables-section">
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>📅 Расписание движения</h3>
+                    <p>Действует ежедневно</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ст. Молодёжная (п. Залесный)</th>
+                            <th>ст. Изумрудная (оз. Карьер)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="time">10:00</td><td class="time">10:39</td></tr>
+                        <tr><td class="time">11:23</td><td class="time">12:02</td></tr>
+                        <tr><td class="time">14:15</td><td class="time">14:54</td></tr>
+                        <tr><td class="time">15:38</td><td class="time">16:17</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>💰 Стоимость проезда</h3>
+                    <p>Детская железная дорога</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Возраст</th>
+                            <th>Стоимость</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Дети до 5 лет</td><td class="price">Бесплатно</td></tr>
+                        <tr><td>Дети от 5 до 10 лет</td><td class="price">100 руб.</td></tr>
+                        <tr><td>Дети от 10 лет и Взрослые</td><td class="price">200 руб.</td></tr>
+                    </tbody>
+                </table>
+                <div class="note">
+                    <p><strong>⚠️ Важно:</strong> За провоз двоих детей в возрасте до 5 лет взимается плата в размере стоимости одного детского билета (100 руб.)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="rules-section">
+            <h2>📋 Правила проезда в поездах ДЖД</h2>
+            <div class="rule-item" onclick="toggleRule(this)">
+                <h4>I. Общие положения</h4>
+                <div class="rule-content">
+                    <p>Детская железная дорога в г. Казани является структурным подразделением Горьковской железной дороги — филиала ОАО «Российские железные дороги» и одновременно центром дополнительного образования детей. Настоящие Правила разработаны в соответствии с Уставом железнодорожного транспорта Российской Федерации, Правилами перевозок пассажиров, багажа, грузобагажа железнодорожным транспортом, а также локальными нормативными актами ОАО «РЖД».</p>
+                    <p style="margin-top: 10px;">ДЖД осуществляет свою деятельность на основании лицензии на образовательную деятельность и свидетельства о допуске к перевозкам пассажиров в международном и пригородном сообщении. Настоящие Правила регулируют отношения между перевозчиком (ДЖД) и пассажирами, определяют права, обязанности и ответственность сторон.</p>
+                    <p style="margin-top: 10px;">Движение поездов осуществляется по утвержденному графику, который формируется с учетом сезонности работы дороги, метеорологических условий и технических возможностей инфраструктуры. Администрация ДЖД оставляет за собой право вносить изменения в расписание и условия перевозки в случае форс-мажорных обстоятельств, неблагоприятных метеорологических условий (температура воздуха выше +28°C, ураганный ветер, ливневый дождь, гроза), технических неисправностей подвижного состава или инфраструктуры, а также при проведении плановых ремонтных работ.</p>
+                </div>
+            </div>
+            <div class="rule-item" onclick="toggleRule(this)">
+                <h4>II. Перевозка пассажиров</h4>
+                <div class="rule-content">
+                    <p>Посадка в поезд производится исключительно по предъявлению действительного проездного билета, оформленного в кассе станции «Молодёжная» или через официальные каналы бронирования. Билет является бланком строгой отчетности и подлежит хранению пассажиром до конца поездки. Дети в возрасте до 5 лет перевозятся бесплатно без предоставления отдельного места, но только в сопровождении взрослых (старше 14 лет). Один взрослый пассажир может бесплатно провезти не более одного ребенка до 5 лет. За провоз второго и последующих детей до 5 лет взимается плата в размере 100 рублей за каждого.</p>
+                    <p style="margin-top: 10px;">Пассажиры обязаны занимать места согласно нумерации вагонов и мест, указанной в билете. Пересадка с места на место во время движения поезда разрешается только с согласия проводника и при отсутствии претензий со стороны других пассажиров на эти места. Во время движения поезда категорически запрещается: выходить из вагона на остановках без разрешения проводника; открывать окна без разрешения проводника, высовывать голову, руки и другие части тела из окон; ходить по подножкам вагонов; отвлекать юных машинистов, диспетчеров и других сотрудников ДЖД от выполнения их служебных обязанностей; пользоваться открытым огнем (зажигалки, спички); курить (включая электронные сигареты) на территории станций, платформ и в поездах.</p>
+                    <p style="margin-top: 10px;">Пассажиры с детьми должны обеспечить постоянный контроль за их поведением и безопасностью. Родители (законные представители) несут полную ответственность за действия несовершеннолетних пассажиров.</p>
+                </div>
+            </div>
+            <div class="rule-item" onclick="toggleRule(this)">
+                <h4>III. Перевозка ручной клади и животных</h4>
+                <div class="rule-content">
+                    <p>Каждый пассажир имеет право бесплатно провозить с собой ручную кладь весом не более 10 кг и размером по сумме трех измерений не более 180 см. К ручной клади относятся вещи, которые по своим размерам и свойствам могут быть размещены на местах для ручной клади, предусмотренных конструкцией вагона (верхние полки, места под сиденьями, специальные стеллажи). Крупногабаритные вещи (лыжи, детские коляски, велосипеды в разобранном виде) размещаются только в специально отведенных местах и при наличии свободной площади. Провоз таких вещей может быть ограничен при полной заполняемости поезда.</p>
+                    <p style="margin-top: 10px;">Запрещается провозить в качестве ручной клади: предметы, которые могут повредить или загрязнить вагон, а также вещи других пассажиров; зловонные предметы; огнеопасные вещества; взрывчатые, отравляющие, ядовитые, едкие и легковоспламеняющиеся вещества; огнестрельное оружие без чехлов и упаковки; предметы, пачкающие одежду пассажиров и мягкую обивку вагонов. Перечень запрещенных к провозу предметов определяется правилами перевозок пассажиров железнодорожным транспортом.</p>
+                    <p style="margin-top: 10px;">Провоз домашних животных (кошек, собак, птиц, мелких грызунов) разрешается исключительно в переносках, клетках или корзинах, исключающих возможность побега животного и причинения неудобств другим пассажирам. Собаки крупных пород должны находиться в намордниках и на коротком поводке под постоянным контролем владельца. За провоз животных взимается дополнительная плата согласно действующим тарифам ДЖД (100 рублей за одно животное). Не допускается провоз животных в вагонах повышенной комфортности.</p>
+                </div>
+            </div>
+            <div class="rule-item" onclick="toggleRule(this)">
+                <h4>IV. Проверка наличия проездных документов</h4>
+                <div class="rule-content">
+                    <p>Контроль проездных документов осуществляется юными проводниками, дежурными по станции и начальником поезда на протяжении всего маршрута следования. Пассажиры обязаны предъявлять билеты по первому требованию контролирующих лиц для проверки действительности, соответствия маршруту и времени отправления. Билет должен быть сохранен пассажиром в течение всей поездки и предъявлен при выходе со станции назначения.</p>
+                    <p style="margin-top: 10px;">Проезд без билета, с недействительным билетом (истек срок действия, поврежден, нечитаем), с билетом, не соответствующим маршруту следования, или с билетом на другое лицо запрещен. В случае выявления безбилетного проезда пассажир обязан оплатить стоимость проезда от станции посадки до станции назначения, а также штрафные санкции в размере, установленном правилами перевозок. Отказ от оплаты влечет удаление пассажира из поезда с составлением акта.</p>
+                    <p style="margin-top: 10px;">При утере билета пассажир должен немедленно сообщить об этом проводнику или дежурному по станции. Восстановление билета возможно при предъявлении документа, удостоверяющего личность, и оплате стоимости услуги по восстановлению.</p>
+                </div>
+            </div>
+            <div class="rule-item" onclick="toggleRule(this)">
+                <h4>V. На территории ДЖД запрещается</h4>
+                <div class="rule-content">
+                    <p>На территории станций, платформ, в поездах и прилегающей инфраструктуре ДЖД строго запрещается: курить (включая использование электронных сигарет, вейпов, систем нагревания табака) — за нарушение предусмотрен штраф согласно КоАП РФ; употреблять спиртные напитки, наркотические средства, психотропные вещества и находиться в состоянии алкогольного или наркотического опьянения; мусорить, бросать окурки, бутылки, пищевые отходы на платформы, пути и в вагоны; портить имущество дороги (вагоны, локомотивы, платформы, ограждения, знаки, оборудование); громко включать музыку, использовать звуковоспроизводящие устройства без наушников, кричать, свистеть, использовать пиротехнические изделия; выходить на железнодорожные пути, переходить пути в неустановленных местах, подлезать под платформы; фотографировать и снимать на видео юных сотрудников во время управления поездом, работы с оборудованием без их согласия и разрешения администрации; бегать по платформам, толкаться, создавать помехи движению пассажиров; проносить оружие (в том числе холодное), боеприпасы, взрывчатые вещества.</p>
+                    <p style="margin-top: 10px;">За нарушение настоящих правил пассажир может быть удален с территории ДЖД без возмещения стоимости билета. В случае причинения ущерба имуществу ДЖД виновное лицо несет материальную ответственность в полном объеме.</p>
+                </div>
+            </div>
+            <div class="rule-item" onclick="toggleRule(this)">
+                <h4>VI. Пассажир может быть удален из поезда</h4>
+                <div class="rule-content">
+                    <p>Пассажир подлежит удалению из поезда и с территории ДЖД в следующих случаях: отсутствие действительного проездного билета и отказ от оплаты стоимости проезда; агрессивное поведение, оскорбление пассажиров или юных сотрудников ДЖД, нецензурная брань; нахождение в состоянии алкогольного или наркотического опьянения, что подтверждается визуальными признаками (запах алкоголя, неадекватное поведение, нарушение координации); совершение действий, угрожающих безопасности движения поездов (выход на пути, бросание предметов в поезд, повреждение инфраструктуры); нарушение общественного порядка, драки, хулиганские действия; отказ от выполнения законных требований сотрудников ДЖД; наличие заболеваний, представляющих опасность для окружающих.</p>
+                    <p style="margin-top: 10px;">Решение об удалении принимает начальник поезда или дежурный по станции с обязательным составлением акта, который подписывается сотрудником ДЖД и двумя понятыми (при возможности). Пассажиру возвращается стоимость билета за неиспользованный участок пути за вычетом фактически пройденного расстояния. В случае удаления за нарушение правил стоимость билета не возвращается.</p>
+                    <p style="margin-top: 10px;">При удалении несовершеннолетнего пассажира обязательно уведомляются его родители (законные представители) или сотрудники правоохранительных органов.</p>
+                </div>
+            </div>
+            <div class="rule-item" onclick="toggleRule(this)">
+                <h4>VII. Отмена движения поездов</h4>
+                <div class="rule-content">
+                    <p>Движение поездов может быть полностью отменено, приостановлено или изменено (сокращен маршрут, изменено время отправления) в следующих случаях: неблагоприятные погодные условия — температура воздуха выше +28°C (риск теплового удара у юных сотрудников и пассажиров), сильный ураган (скорость ветра более 15 м/с), ливневый дождь (ухудшение видимости, риск подтопления путей), гроза (опасность поражения молнией), гололед; технические неисправности локомотива (отказ двигателя, тормозной системы, систем управления), вагонов (неисправность дверей, окон, систем отопления), железнодорожной инфраструктуры (повреждение рельсов, шпал, стрелочных переводов, контактной сети); проведение плановых ремонтных работ на путях, замена рельсов, шпал, балласта; аварийные ситуации (сход подвижного состава с рельсов, падение деревьев на пути, подтопление); форс-мажорные обстоятельства (пожар, землетрясение, наводнение).</p>
+                    <p style="margin-top: 10px;">Информация об отмене или изменении расписания публикуется на официальном сайте ДЖД, в официальных группах в социальных сетях (ВКонтакте, Telegram), а также размещается на информационном табло станции «Молодёжная» не менее чем за 2 часа до времени отправления. При экстренной отмене поезда в пути следования пассажирам предоставляется возможность вернуться на станцию отправления на попутном транспорте или ожидать устранения неисправности.</p>
+                    <p style="margin-top: 10px;">При отмене поезда по инициативе перевозчика пассажирам возвращается полная стоимость билета без удержания комиссий и сборов. Для организованных групп (школьные классы, детские лагеря) предлагается альтернативная дата поездки.</p>
+                </div>
+            </div>
+            <div class="rule-item" onclick="toggleRule(this)">
+                <h4>VIII. Информация для пассажиров</h4>
+                <div class="rule-content">
+                    <p>Продажа билетов в кассах станции «Молодёжная» заканчивается строго за 3 минуты до отправления поезда. Это время необходимо для подготовки поезда к отправлению, проверки билетов, размещения пассажиров по местам. Билет действителен только для проезда в одну сторону в день, указанный в билете, и на поезд, указанный в расписании. Обмен билета на другое время или дату не производится. Бронирование мест осуществляется только для организованных групп численностью от 10 человек (школьные классы, детские лагеря, туристические группы) по предварительной письменной заявке, поданной не менее чем за 3 дня до желаемой даты поездки. Группам предоставляется скидка 10% при численности от 20 человек.</p>
+                    <p style="margin-top: 10px;">Предварительная продажа билетов на конкретные даты не предусмотрена. Билеты приобретаются в день поездки в кассе станции «Молодёжная». Возможна оплата наличными и банковскими картами. Касса работает ежедневно с 9:00 до 16:00. Справочная информация по телефонам: <a href="tel:+78432942304" style="color:#cc0000;">+7 (843) 294-23-04</a> (справочная), <a href="tel:+78432942313" style="color:#cc0000;">+7 (843) 294-23-13</a> (бронирование для групп). Телефоны работают в режиме работы кассы. Также информацию можно получить по электронной почте: <a href="mailto:djd_kazan@mail.ru" style="color:#cc0000;">djd_kazan@mail.ru</a>.</p>
+                    <p style="margin-top: 10px;">Официальный сайт ДЖД: www.djd-kazan.ru (разделы «Расписание», «Стоимость», «Правила»). Группы в социальных сетях: ВКонтакте (vk.com/djdkazan), Telegram (@djd_kazan). Администрация ДЖД желает вам приятного и безопасного путешествия!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="buy-ticket-section">
+            <h2>🎫 Готовы к путешествию?</h2>
+            <p>Приобретайте билеты прямо сейчас!</p>
+            <a href="schedule.html" class="buy-btn">🎫 Купить билет</a>
+        </div>
+    </div>
+    
+    <!-- Плавающая кнопка "Записаться" -->
+    <a href="enroll.html" class="floating-btn">📝 Записаться</a>
+    
+    <script>
+        function toggleRule(element) { 
+            const content = element.querySelector('.rule-content'); 
+            content.classList.toggle('active'); 
+        }
+        
+        ymaps.ready(init);
+        function init(){
+            const startCoords = [55.8165, 49.0850];
+            const endCoords = [55.8100, 49.0750];
+            const myMap = new ymaps.Map("map", { 
+                center: [55.8132, 49.0800], 
+                zoom: 14, 
+                controls: ['zoomControl', 'fullscreenControl'] 
+            });
+            const startPlacemark = new ymaps.Placemark(
+                startCoords, 
+                { hintContent: 'ст. Молодёжная', balloonContent: '<strong>ст. Молодёжная</strong><br>г. Казань, ул. Алтынова, 4А<br>пос. Залесный' }, 
+                { preset: 'islands#greenCircleIcon', iconColor: '#28a745' }
+            );
+            const endPlacemark = new ymaps.Placemark(
+                endCoords, 
+                { hintContent: 'ст. Изумрудная', balloonContent: '<strong>ст. Изумрудная</strong><br>Юдинский карьер<br>оз. Карьер' }, 
+                { preset: 'islands#redCircleIcon', iconColor: '#cc0000' }
+            );
+            const routeLine = new ymaps.Polyline(
+                [startCoords, endCoords], 
+                {}, 
+                { strokeColor: "#003366", strokeWidth: 5, strokeOpacity: 0.8 }
+            );
+            myMap.geoObjects.add(startPlacemark); 
+            myMap.geoObjects.add(endPlacemark); 
+            myMap.geoObjects.add(routeLine);
+        }
+    </script>
+</body>
+</html>

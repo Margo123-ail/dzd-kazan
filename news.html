@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новости - ДЖД Казань</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        header { position: fixed; top: 0; width: 100%; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); z-index: 1000; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 8px 5%; max-width: 1400px; margin: 0 auto; position: relative; flex-wrap: wrap; }
+        .logo { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo img { width: 120px; height: 120px; }
+        .logo-text { font-size: 22px; font-weight: bold; color: #003366; }
+        .menu { display: flex; list-style: none; gap: 15px; flex-wrap: wrap; }
+        .menu a { text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; font-size: 14px; padding: 5px 10px; border-radius: 5px; }
+        .menu a:hover { color: #003366; background: rgba(0, 51, 102, 0.1); }
+        .menu a.active { color: white; background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%); }
+        
+        .admin-menu { position: relative; }
+        .dots-btn { background: none; border: none; font-size: 30px; cursor: pointer; color: #003366; padding: 0 10px; }
+        .dots-dropdown { display: none; position: absolute; top: 40px; right: 0; background: white; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); min-width: 200px; z-index: 2000; overflow: hidden; }
+        .dots-dropdown.active { display: block; }
+        .dots-dropdown button { width: 100%; padding: 15px; background: none; border: none; text-align: left; cursor: pointer; font-size: 16px; color: #333; transition: 0.3s; }
+        .dots-dropdown button:hover { background: #f0f2f5; color: #cc0000; }
+        
+        .main-content { margin-top: 140px; padding: 40px 20px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+        .page-header { text-align: center; margin-bottom: 60px; }
+        .page-header h1 { font-size: 56px; color: #003366; margin-bottom: 15px; text-transform: uppercase; }
+        
+        .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .news-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: all 0.3s; border-top: 5px solid #cc0000; }
+        .news-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .news-img { width: 100%; height: 200px; background: linear-gradient(135deg, #003366, #cc0000); display: flex; align-items: center; justify-content: center; color: white; font-size: 40px; overflow: hidden; }
+        .news-img img { width: 100%; height: 100%; object-fit: cover; }
+        .news-body { padding: 25px; }
+        .news-date { color: #cc0000; font-size: 14px; font-weight: bold; margin-bottom: 10px; }
+        .news-title { font-size: 22px; color: #003366; margin-bottom: 15px; }
+        .news-text { color: #555; line-height: 1.6; margin-bottom: 15px; }
+        .news-author { font-size: 14px; color: #999; font-style: italic; }
+        
+        .submit-section { background: linear-gradient(135deg, #003366 0%, #001a33 100%); padding: 50px; border-radius: 20px; color: white; margin-bottom: 60px; }
+        .submit-section h2 { font-size: 36px; margin-bottom: 30px; text-align: center; }
+        .submit-form { max-width: 700px; margin: 0 auto; display: grid; gap: 20px; }
+        .submit-form input, .submit-form textarea { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-family: inherit; }
+        .submit-form textarea { min-height: 150px; resize: vertical; }
+        .submit-btn { padding: 20px; background: #cc0000; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .submit-btn:hover { background: #990000; transform: translateY(-3px); }
+        
+        .admin-panel { display: none; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 60px; border: 3px solid #cc0000; }
+        .admin-panel.active { display: block; }
+        .admin-panel h2 { color: #003366; margin-bottom: 30px; border-bottom: 3px solid #cc0000; padding-bottom: 10px; }
+        .admin-section { margin-bottom: 40px; }
+        .admin-section h3 { color: #cc0000; margin-bottom: 20px; font-size: 24px; }
+        .pending-item { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid #ff9800; }
+        .pending-item h4 { color: #003366; margin-bottom: 10px; }
+        .pending-item p { color: #555; margin-bottom: 15px; line-height: 1.6; }
+        .pending-item img { max-width: 100%; max-height: 200px; border-radius: 10px; margin: 10px 0; object-fit: cover; }
+        .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-approve { background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-reject { background: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-approve:hover, .btn-reject:hover { opacity: 0.8; }
+        
+        .login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; }
+        .login-modal.active { display: flex; }
+        .login-box { background: white; padding: 40px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center; }
+        .login-box h2 { color: #003366; margin-bottom: 20px; }
+        .login-box input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; }
+        .login-box button { width: 100%; padding: 15px; background: #cc0000; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .login-error { color: #cc0000; margin-top: 10px; display: none; }
+        
+        /* Плавающая кнопка */
+        .floating-btn { position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #cc0000 0%, #990000 100%); color: white; padding: 20px 35px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 18px; box-shadow: 0 10px 30px rgba(204, 0, 0, 0.5); z-index: 999; transition: all 0.3s; }
+        .floating-btn:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 15px 40px rgba(204, 0, 0, 0.7); }
+        
+        /* Пустое состояние */
+        .empty-state { text-align: center; padding: 40px; color: #666; grid-column: 1 / -1; }
+        .empty-state .icon { font-size: 60px; margin-bottom: 15px; }
+        
+        @media (max-width: 1200px) {
+            .menu { gap: 10px; }
+            .menu a { font-size: 13px; padding: 5px 8px; }
+        }
+        @media (max-width: 992px) {
+            nav { flex-direction: column; gap: 15px; }
+            .menu { justify-content: center; }
+        }
+        @media (max-width: 768px) { 
+            .menu { display: none; } 
+            .news-grid { grid-template-columns: 1fr; }
+            .page-header h1 { font-size: 32px; }
+            .floating-btn { padding: 15px 25px; font-size: 16px; bottom: 20px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo" onclick="window.location.href='index.html'">
+                <img src="images/logo.png" alt="ДЖД">
+                <span class="logo-text">ДЖД КАЗАНЬ</span>
+            </div>
+            <ul class="menu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="about.html">О нас</a></li>
+                <li><a href="students.html">Учащимся</a></li>
+                <li><a href="passengers.html">Пассажирам</a></li>
+                <li><a href="route-map.html">🗺️ Маршрут</a></li>
+                <li><a href="gallery.html">📸 Галерея</a></li>
+                <li><a href="schedule.html">📅 Расписание</a></li>
+                <li><a href="enroll.html">📝 Запись</a></li>
+                <li><a href="history-timeline.html">📜 История</a></li>
+                <li><a href="history.html">📖 Наша история</a></li>
+                <li><a href="video.html">🎬 Видео</a></li>
+                <li><a href="parents.html">👨👧 Родителям</a></li>
+                <li><a href="feedback.html">💬 Отзывы</a></li>
+                <li><a href="additional.html">Дополнительно</a></li>
+                <li><a href="news.html" class="active">Новости</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+            <div class="admin-menu">
+                <button class="dots-btn" onclick="toggleDots()">⋮</button>
+                <div class="dots-dropdown" id="dotsDropdown">
+                    <button onclick="openLoginModal()" id="loginBtn">🔒 Войти как админ</button>
+                    <button onclick="logoutAdmin()" id="logoutBtn" style="display: none;">🚪 Выйти из админки</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1>📰 Новости ДЖД</h1>
+            <p>Следите за жизнью детской железной дороги!</p>
+        </div>
+        
+        <div class="admin-panel" id="adminPanel">
+            <h2>🛠️ Панель модерации</h2>
+            <div class="admin-section">
+                <h3>📝 Заявки на поступление (Южики)</h3>
+                <div id="pendingApps"></div>
+            </div>
+            <div class="admin-section">
+                <h3>📢 Публикации на модерации</h3>
+                <div id="pendingPosts"></div>
+            </div>
+            <div class="admin-section">
+                <h3>✅ Опубликованные публикации</h3>
+                <div id="publishedPosts"></div>
+            </div>
+        </div>
+        
+        <div class="news-grid" id="newsGrid"></div>
+        
+        <div class="submit-section">
+            <h2>📤 Добавить свою новость / публикацию</h2>
+            <form class="submit-form" id="submitPostForm">
+                <input type="text" id="postTitle" placeholder="Заголовок новости / публикации" required>
+                <input type="text" id="postAuthor" placeholder="Ваше имя / Название паблика/сообщества" required>
+                <input type="file" id="postImageFile" accept="image/*" style="padding: 10px; background: white; border-radius: 10px;">
+                <small style="color: #ccc;">Или вставьте ссылку на картинку:</small>
+                <input type="url" id="postImage" placeholder="https://... (необязательно)">
+                <textarea id="postText" placeholder="Текст публикации..." required></textarea>
+                <button type="submit" class="submit-btn">📤 Отправить на модерацию</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Плавающая кнопка "Записаться" -->
+    <a href="enroll.html" class="floating-btn">📝 Записаться</a>
+    
+    <div class="login-modal" id="loginModal">
+        <div class="login-box">
+            <h2>🔒 Вход для администратора</h2>
+            <input type="text" id="adminLogin" placeholder="Логин">
+            <input type="password" id="adminPass" placeholder="Пароль">
+            <button onclick="checkLogin()">Войти</button>
+            <p class="login-error" id="loginError">Неверный логин или пароль!</p>
+            <p style="margin-top: 15px; cursor: pointer; color: #003366;" onclick="closeLoginModal()">Отмена</p>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_LOGIN = 'admin';
+        const ADMIN_PASS = 'djd2026kaz';
+        let isAdmin = sessionStorage.getItem('djd_admin_logged') === 'true';
+        let posts = JSON.parse(localStorage.getItem('djd_news_posts') || '[]');
+        let apps = JSON.parse(localStorage.getItem('djd_applications') || '[]');
+        
+        if (posts.length === 0) {
+            posts.push({ 
+                id: 1, 
+                title: "Открытие летнего сезона ДЖД!", 
+                author: "Администрация ДЖД", 
+                text: "Дорогие друзья! Мы рады сообщить об открытии летнего сезона на Казанской детской железной дороге. Ждем всех пассажиров!", 
+                date: "01.06.2026", 
+                status: "approved", 
+                img: "" 
+            });
+            localStorage.setItem('djd_news_posts', JSON.stringify(posts));
+        }
+        
+        function renderNews() {
+            const grid = document.getElementById('newsGrid');
+            grid.innerHTML = '';
+            const approvedPosts = posts.filter(p => p.status === 'approved').reverse();
+            
+            if (approvedPosts.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><div class="icon">📰</div><h3>Пока нет новостей</h3><p>Будьте первым, кто опубликует новость!</p></div>';
+                return;
+            }
+            
+            approvedPosts.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'news-card';
+                card.innerHTML = `
+                    <div class="news-img">
+                        ${p.img ? `<img src="${p.img}" alt="news" onerror="this.style.display='none'; this.parentElement.innerHTML='🚂'">` : '🚂'}
+                    </div>
+                    <div class="news-body">
+                        <div class="news-date">📅 ${p.date}</div>
+                        <div class="news-title">${p.title}</div>
+                        <div class="news-text">${p.text}</div>
+                        <div class="news-author">✍️ ${p.author}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        function renderAdmin() {
+            const appsContainer = document.getElementById('pendingApps');
+            const postsContainer = document.getElementById('pendingPosts');
+            const publishedContainer = document.getElementById('publishedPosts');
+            
+            appsContainer.innerHTML = apps.filter(a => a.status === 'pending').length === 0 
+                ? '<p style="color: #999;">Нет новых заявок</p>' 
+                : '';
+            apps.filter(a => a.status === 'pending').forEach(a => {
+                appsContainer.innerHTML += `
+                    <div class="pending-item">
+                        <h4>👤 ${a.name} ${a.surname} (${a.age} лет)</h4>
+                        <p>📞 ${a.phone} | ✉️ ${a.email}<br>🎓 Направление: ${a.course}</p>
+                        <div class="admin-actions">
+                            <button class="btn-approve" onclick="approveApp(${a.id})">✅ Одобрить</button>
+                            <button class="btn-reject" onclick="rejectApp(${a.id})">❌ Отклонить</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            postsContainer.innerHTML = posts.filter(p => p.status === 'pending').length === 0 
+                ? '<p style="color: #999;">Нет публикаций на модерации</p>' 
+                : '';
+            posts.filter(p => p.status === 'pending').forEach(p => {
+                postsContainer.innerHTML += `
+                    <div class="pending-item">
+                        <h4>📢 ${p.title}</h4>
+                        ${p.img ? `<img src="${p.img}">` : ''}
+                        <p>✍️ ${p.author}<br>${p.text.substring(0, 150)}${p.text.length > 150 ? '...' : ''}</p>
+                        <div class="admin-actions">
+                            <button class="btn-approve" onclick="approvePost(${p.id})">✅ Опубликовать</button>
+                            <button class="btn-reject" onclick="rejectPost(${p.id})">❌ Отклонить</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            publishedContainer.innerHTML = posts.filter(p => p.status === 'approved').length === 0 
+                ? '<p style="color: #999;">Нет опубликованных постов</p>' 
+                : '';
+            posts.filter(p => p.status === 'approved').forEach(p => {
+                publishedContainer.innerHTML += `
+                    <div class="pending-item" style="border-left-color: #4caf50;">
+                        <h4>✅ ${p.title}</h4>
+                        ${p.img ? `<img src="${p.img}">` : ''}
+                        <p>✍️ ${p.author} | 📅 ${p.date}</p>
+                        <div class="admin-actions">
+                            <button class="btn-reject" onclick="deletePost(${p.id})">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        document.getElementById('submitPostForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('postImageFile');
+            const linkInput = document.getElementById('postImage').value;
+            
+            const processPost = (imgData) => {
+                const newPost = { 
+                    id: Date.now(), 
+                    title: document.getElementById('postTitle').value, 
+                    author: document.getElementById('postAuthor').value, 
+                    img: imgData || linkInput || '', 
+                    text: document.getElementById('postText').value, 
+                    date: new Date().toLocaleDateString('ru-RU'), 
+                    status: 'pending' 
+                };
+                posts.push(newPost);
+                localStorage.setItem('djd_news_posts', JSON.stringify(posts));
+                alert('✅ Ваша публикация отправлена на модерацию! После одобрения она появится в ленте.');
+                this.reset();
+                renderAdmin();
+            };
+            
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { processPost(e.target.result); };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else { 
+                processPost(''); 
+            }
+        });
+        
+        function approveApp(id) { 
+            const app = apps.find(a => a.id === id); 
+            if (app) { 
+                app.status = 'approved'; 
+                localStorage.setItem('djd_applications', JSON.stringify(apps)); 
+                renderAdmin(); 
+                alert('✅ Заявка одобрена!'); 
+            } 
+        }
+        
+        function rejectApp(id) { 
+            if (confirm('Отклонить заявку?')) {
+                apps = apps.filter(a => a.id !== id); 
+                localStorage.setItem('djd_applications', JSON.stringify(apps)); 
+                renderAdmin(); 
+            }
+        }
+        
+        function approvePost(id) { 
+            const post = posts.find(p => p.id === id); 
+            if (post) { 
+                post.status = 'approved'; 
+                localStorage.setItem('djd_news_posts', JSON.stringify(posts)); 
+                renderNews(); 
+                renderAdmin(); 
+            } 
+        }
+        
+        function rejectPost(id) { 
+            if (confirm('Отклонить публикацию?')) {
+                posts = posts.filter(p => p.id !== id); 
+                localStorage.setItem('djd_news_posts', JSON.stringify(posts)); 
+                renderNews(); 
+                renderAdmin(); 
+            }
+        }
+        
+        function deletePost(id) { 
+            if (confirm('Вы уверены, что хотите удалить эту публикацию?')) { 
+                posts = posts.filter(p => p.id !== id); 
+                localStorage.setItem('djd_news_posts', JSON.stringify(posts)); 
+                renderAdmin(); 
+                renderNews(); 
+            } 
+        }
+        
+        function toggleDots() { 
+            document.getElementById('dotsDropdown').classList.toggle('active'); 
+        }
+        
+        function openLoginModal() { 
+            document.getElementById('loginModal').classList.add('active'); 
+            document.getElementById('dotsDropdown').classList.remove('active'); 
+        }
+        
+        function closeLoginModal() { 
+            document.getElementById('loginModal').classList.remove('active'); 
+        }
+        
+        function checkLogin() {
+            const l = document.getElementById('adminLogin').value;
+            const p = document.getElementById('adminPass').value;
+            if (l === ADMIN_LOGIN && p === ADMIN_PASS) { 
+                isAdmin = true; 
+                sessionStorage.setItem('djd_admin_logged', 'true'); 
+                updateAdminUI(); 
+                closeLoginModal(); 
+            } else { 
+                document.getElementById('loginError').style.display = 'block'; 
+            }
+        }
+        
+        function logoutAdmin() { 
+            isAdmin = false; 
+            sessionStorage.removeItem('djd_admin_logged'); 
+            updateAdminUI(); 
+            document.getElementById('dotsDropdown').classList.remove('active'); 
+        }
+        
+        function updateAdminUI() {
+            document.getElementById('loginBtn').style.display = isAdmin ? 'none' : 'block';
+            document.getElementById('logoutBtn').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('adminPanel').classList.toggle('active', isAdmin);
+            if (isAdmin) renderAdmin();
+        }
+        
+        document.addEventListener('click', e => { 
+            if (!e.target.closest('.admin-menu')) {
+                document.getElementById('dotsDropdown').classList.remove('active'); 
+            }
+        });
+        
+        // Enter для входа
+        document.getElementById('adminPass').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkLogin();
+        });
+        
+        renderNews();
+        updateAdminUI();
+    </script>
+</body>
+</html>
